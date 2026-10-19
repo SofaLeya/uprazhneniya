@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0d">
+<title>Комплекс для спины</title>
+<style>
+  :root{
+    --bg: #0a0a0d;
+    --card: #15151a;
+    --card-border: #2a2a33;
+    --accent: #b98cff;
+    --accent-soft: rgba(185,140,255,0.12);
+    --text: #f2f2f5;
+    --text-dim: #a3a3ad;
+    --done: #6ee7a8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(1200px 800px at 20% -10%, #1c1626 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    padding: 32px 16px 80px;
+  }
+  .wrap{ max-width: 720px; margin:0 auto; }
+  header{ text-align:center; margin-bottom: 28px; }
+  header h1{
+    font-size: 26px;
+    margin: 0 0 6px;
+    letter-spacing: 0.3px;
+  }
+  header p{
+    color: var(--text-dim);
+    font-size: 14px;
+    margin: 0;
+  }
+  .progress-bar{
+    height: 6px;
+    background: #1e1e26;
+    border-radius: 10px;
+    margin-top: 18px;
+    overflow: hidden;
+  }
+  .progress-fill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,#b98cff,#7c5cff);
+    transition: width .3s ease;
+  }
+  .progress-label{
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    text-align:center;
+  }
+
+  .group-title{
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    margin: 32px 4px 12px;
+    font-weight: 600;
+  }
+  .group-title:first-of-type{ margin-top: 8px; }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    position: relative;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .card.done{
+    border-color: rgba(110,231,168,0.4);
+    background: linear-gradient(180deg, rgba(110,231,168,0.05), var(--card));
+  }
+  .card-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .card-title-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+  }
+  .num{
+    flex-shrink:0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size: 13px;
+  }
+  .card.done .num{
+    background: rgba(110,231,168,0.15);
+    color: var(--done);
+  }
+  .card-title{
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .checkbox{
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 2px solid #3a3a45;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: all .2s ease;
+  }
+  .checkbox.checked{
+    background: var(--done);
+    border-color: var(--done);
+  }
+  .checkbox.checked::after{
+    content:"✓";
+    color:#0a0a0d;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .card-body{
+    margin-top: 14px;
+    display: grid;
+    gap: 10px;
+  }
+  .row{
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .row b{
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .row.important b{ color: #ff9d7a; }
+  .tags{
+    display:flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .tag{
+    font-size: 12px;
+    color: var(--text-dim);
+    background: #1e1e26;
+    border: 1px solid var(--card-border);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .tag.new{
+    color: var(--accent);
+    border-color: rgba(185,140,255,0.4);
+    background: var(--accent-soft);
+  }
+
+  footer{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 36px;
+  }
+
+  .howto{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .howto summary{ cursor:pointer; font-weight:700; color: var(--accent); }
+  .howto ol{ margin: 12px 0 0; padding-left: 20px; display:grid; gap:6px; }
+  .toolbar{ text-align:right; margin-bottom: 4px; }
+  .toolbar button{
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--card-border); border-radius: 999px;
+    padding: 6px 14px; font-size: 12px; cursor: pointer;
+  }
+  .toolbar button:hover{ color: var(--text); border-color: var(--accent); }
+  body{ padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .card-head:focus-visible, .toolbar button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🧘‍♀️ Комплекс упражнений</h1>
+    <p>Дыхание · спина · кор · растяжка</p>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 из 20 выполнено</div>
+  </header>
+
+  <details class="howto">
+    <summary>Как пользоваться резинкой</summary>
+    <ol>
+      <li>Надевай петлю <b>чуть выше колен</b>, не на щиколотки.</li>
+      <li>Начинай с самой <b>лёгкой</b> ленты из набора.</li>
+      <li>В исходном положении натяжение лёгкое, резинка добавляет сопротивление движению.</li>
+      <li>Колени давят наружу против резинки и не сводятся внутрь.</li>
+      <li>Дыши ровно, без задержки. Если резинка давит в области таза, ослабь натяжение.</li>
+    </ol>
+  </details>
+
+  <div class="toolbar"><button type="button" onclick="resetAll()">Сбросить отметки</button></div>
+
+
+  <div class="group-title">Разминка и дыхание</div>
+
+  <div class="card" data-id="1">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">1</div>
+        <h3 class="card-title">Кошка-Корова</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> На четвереньках. На вдохе прогнуться, взгляд вверх. На выдохе округлить спину, подбородок к груди.</div>
+      <div class="row"><b>Дыхание:</b> Вдох на прогибе, выдох на округлении.</div>
+      <div class="row"><b>Подходы:</b> 10–12 медленных повторов.</div>
+      <div class="row important"><b>Важно:</b> Движения плавные, без резких прогибов.</div>
+    </div>
+  </div>
+  <div class="card" data-id="2">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">2</div>
+        <h3 class="card-title">Диафрагмальное дыхание</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Руки на животе. Вдох носом — медленно надуть живот, выдох ртом — втянуть живот.</div>
+      <div class="row"><b>Дыхание:</b> Вдох 3–4 сек, выдох 5–6 сек.</div>
+      <div class="row"><b>Подходы:</b> 5–7 дыхательных циклов.</div>
+      <div class="row important"><b>Важно:</b> Расслабить шею и плечи.</div>
+    </div>
+  </div>
+  <div class="group-title">Кор и ягодицы</div>
+
+  <div class="card" data-id="3">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">3</div>
+        <h3 class="card-title">Скользящие пятки</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Медленно выпрямить одну ногу, скользя пяткой по полу. Вернуть в исходное положение.</div>
+      <div class="row"><b>Дыхание:</b> Выдох — на выпрямлении, вдох — на возврате.</div>
+      <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
+      <div class="row important"><b>Важно:</b> Поясница прижата к полу!</div>
+    </div>
+  </div>
+  <div class="card" data-id="4">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">4</div>
+        <h3 class="card-title">Разгибание ног из положения «стол»</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, оба колена подняты и согнуты под 90° (положение «стол»), руки лежат вдоль тела или на бёдрах. На выдохе медленно выпрямить и опустить одну ногу вперёд-вниз, не касаясь пола. На вдохе вернуть колено обратно в исходное положение. Повторить на другую ногу.</div>
+      <div class="row"><b>Дыхание:</b> Выдох — на опускании ноги, вдох — на возврате.</div>
+      <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
+      <div class="row important"><b>Важно:</b> Поясница прижата к полу, живот слегка втянут, таз не раскачивается.</div>
+      <div class="tags"><span class="tag new">добавлено из видео</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="5">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">5</div>
+        <h3 class="card-title">Ягодичный мостик</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. На выдохе поднять таз, сжав ягодицы. Задержаться 2–3 сек. На вдохе опустить.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох при опускании.</div>
+      <div class="row"><b>Подходы:</b> 10–12 раз.</div>
+      <div class="row important"><b>Важно:</b> Не прогибаться сильно в пояснице.</div>
+    </div>
+  </div>
+  <div class="card" data-id="6">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">6</div>
+        <h3 class="card-title">Ягодичный мостик с резинкой</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Резинка выше колен. Лёжа на спине, ноги согнуты, стопы на ширине таза. На выдохе поднять таз, одновременно слегка разводя колени против резинки (не сильно, просто не давая им сводиться). Задержаться 2 сек, опустить.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох при опускании.</div>
+      <div class="row"><b>Подходы:</b> 10–12 раз.</div>
+      <div class="row important"><b>Важно:</b> Таз поднимать за счёт ягодиц, не прогибаясь сильно в пояснице.</div>
+      <div class="tags"><span class="tag new">лёгкая резинка</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="7">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">7</div>
+        <h3 class="card-title">Велосипед</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, поднять согнутые ноги. Поочерёдно выпрямлять и сгибать ноги, имитируя кручение педалей велосипеда. Можно поднять ноги чуть выше для лучшего оттока.</div>
+      <div class="row"><b>Дыхание:</b> Ровное и свободное, не задерживать.</div>
+      <div class="row"><b>Подходы:</b> 20–30 секунд (30–40 «прокрутов»).</div>
+      <div class="row important"><b>Важно:</b> Поясница прижата к полу, движения плавные, без рывков.</div>
+      <div class="tags"><span class="tag new">от отёков</span></div>
+    </div>
+  </div>
+  <div class="group-title">Четвереньки и бёдра</div>
+
+  <div class="card" data-id="8">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">8</div>
+        <h3 class="card-title">Птица-собака</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> На четвереньках. На выдохе одновременно вытянуть правую руку вперёд и левую ногу назад в одну линию с корпусом. Задержаться 1–2 сек, вернуться. Затем — левая рука и правая нога.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на вытягивании, вдох — возврат.</div>
+      <div class="row"><b>Подходы:</b> 8–10 раз на каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Не проваливать поясницу, таз держать ровно, пресс в лёгком напряжении.</div>
+    </div>
+  </div>
+  <div class="card" data-id="9">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">9</div>
+        <h3 class="card-title">Отведение ноги в «собаке» с резинкой</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Резинка выше колен. На четвереньках, как в упражнении «собака». На выдохе отвести согнутую в колене ногу в сторону и чуть назад, против резинки. На вдохе вернуть.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на движении, вдох — возврат.</div>
+      <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
+      <div class="row important"><b>Важно:</b> Таз не заваливать в сторону, спина прямая, движение небольшое и медленное.</div>
+      <div class="tags"><span class="tag new">лёгкая резинка</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="10">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">10</div>
+        <h3 class="card-title">Моллюск (на боку)</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Резинка выше колен. Лечь на бок, колени согнуты примерно под 90°, стопы вместе. Опираясь на локоть, на выдохе поднять верхнее колено вверх, не разводя стопы. На вдохе опустить.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на подъёме колена, вдох на опускании.</div>
+      <div class="row"><b>Подходы:</b> 10–12 раз на каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Таз не заваливать назад, корпус неподвижен. Полностью безопасно для поясницы.</div>
+      <div class="tags"><span class="tag new">лёгкая резинка</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="11">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">11</div>
+        <h3 class="card-title">Разведение коленей сидя</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Резинка выше колен. Сидя на стуле, спина прямая, стопы на полу на ширине таза. На выдохе развести колени в стороны против резинки, задержаться 1–2 сек, на вдохе свести обратно.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на разведении, вдох на сведении.</div>
+      <div class="row"><b>Подходы:</b> 12–15 раз.</div>
+      <div class="row important"><b>Важно:</b> Самое щадящее упражнение из всех — без нагрузки на поясницу и таз вообще.</div>
+      <div class="tags"><span class="tag new">лёгкая/средняя резинка</span></div>
+    </div>
+  </div>
+  <div class="group-title">Силовые без веса</div>
+
+  <div class="card" data-id="12">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">12</div>
+        <h3 class="card-title">Присед у стены (стульчик)</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Спина и затылок прижаты к стене, ноги на ширине плеч, стопы чуть впереди. Согнуть колени примерно до 90° (или меньше, насколько комфортно), как будто садишься на невидимый стул. Удерживать позу.</div>
+      <div class="row"><b>Дыхание:</b> Ровное, не задерживать, дышать через удержание.</div>
+      <div class="row"><b>Подходы:</b> 3 раза по 15–30 секунд.</div>
+      <div class="row important"><b>Важно:</b> Поясница прижата к стене, колени не выходят за носки. Начинай с меньшего времени и неглубокого угла.</div>
+      <div class="tags"><span class="tag new">силовое</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="13">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">13</div>
+        <h3 class="card-title">Приседания со стулом</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Встать перед стулом, ноги на ширине плеч. Медленно отвести таз назад и присесть, слегка коснувшись стула ягодицами, не садясь полностью. Подняться обратно.</div>
+      <div class="row"><b>Дыхание:</b> Вдох на опускании, выдох на подъёме.</div>
+      <div class="row"><b>Подходы:</b> 10–12 раз.</div>
+      <div class="row important"><b>Важно:</b> Спина прямая, не круглить поясницу, колени смотрят по направлению носков. Глубина — пока поясница не начала подкручиваться, дальше не нужно.</div>
+      <div class="tags"><span class="tag new">силовое</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="14">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">14</div>
+        <h3 class="card-title">Гиперэкстензия на тренажёре</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Настроить упор так, чтобы валик находился в области паха/верха бедра, а не на пояснице. Из положения корпус вниз (спина округлена расслабленно) на выдохе плавно поднять корпус до ровной линии с ногами — не выше, без переразгибания в пояснице. На вдохе так же плавно опустить обратно.</div>
+      <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох на опускании.</div>
+      <div class="row"><b>Подходы:</b> 2–3 подхода по 10–12 раз, начиная с небольшой амплитуды.</div>
+      <div class="row important"><b>Важно:</b> Не запрокидывать корпус выше прямой линии, не делать рывков, без задержки дыхания и натуживания в верхней точке. Начинай с малого числа повторов и следи за ощущениями в пояснице.</div>
+      <div class="tags"><span class="tag new">силовое · на тренажёре</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="15">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">15</div>
+        <h3 class="card-title">Шаги в сторону (Monster walk)</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Резинка выше колен. Встать, ноги на ширине плеч, лёгкое приседание. Сделать 8–10 небольших шагов в одну сторону, сохраняя натяжение резинки, затем столько же обратно.</div>
+      <div class="row"><b>Дыхание:</b> Ровное, не задерживать.</div>
+      <div class="row"><b>Подходы:</b> 2 прохода в каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Корпус держать прямо, не наклоняться вперёд. Добавляй это упражнение позже, когда остальные станут привычными.</div>
+      <div class="tags"><span class="tag new">добавить позже</span></div>
+    </div>
+  </div>
+<div class="group-title">Растяжка и расслабление</div>
+
+  <div class="card" data-id="16">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">16</div>
+        <h3 class="card-title">Растяжка груди в дверном проёме</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Встать в дверном проёме, предплечье и локоть упереть в раму под углом примерно 90°. Мягко шагнуть вперёд, пока не почувствуется растяжение в груди/переднем плече.</div>
+      <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
+      <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Тянуть плавно, без рывков, без боли в плечевом суставе.</div>
+      <div class="tags"><span class="tag new">для замка за спиной</span></div>
+    </div>
+  </div>
+
+  <div class="card" data-id="17">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">17</div>
+        <h3 class="card-title">Растяжка трицепса/плеча сверху</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Поднять руку вверх, согнуть в локте, кисть завести за голову. Другой рукой аккуратно потянуть локоть вниз-назад.</div>
+      <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
+      <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Тянуть до лёгкого натяжения, не давить резко на локоть.</div>
+      <div class="tags"><span class="tag new">для замка за спиной</span></div>
+    </div>
+  </div>
+
+  <div class="card" data-id="18">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">18</div>
+        <h3 class="card-title">Замок руками за спиной (с полотенцем)</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Одна рука заводится через плечо сверху (локоть вверх, ладонь к позвоночнику), другая — снизу вдоль поясницы (ладонь наружу). Если пальцы не встречаются, взять полотенце/ремешок: верхняя рука держит его сверху, нижняя перехватывает снизу. Постепенно, по чуть-чуть, перехватывать руки ближе друг к другу вдоль полотенца.</div>
+      <div class="row"><b>Дыхание:</b> Глубокое и ровное, не задерживать.</div>
+      <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону — обязательно обе, одна обычно даётся заметно легче.</div>
+      <div class="row important"><b>Важно:</b> Тянуть до лёгкого натяжения, не через боль в плече. Прогресс идёт медленно — это нормально, без полотенца может не сойтись месяцами.</div>
+      <div class="tags"><span class="tag new">мобильность плеч</span></div>
+    </div>
+  </div>
+
+  <div class="card" data-id="19">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">19</div>
+        <h3 class="card-title">Растяжка грушевидной мышцы лёжа (figure-4)</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Одну лодыжку положить на колено другой ноги (как цифра 4). Руками обхватить заднее бедро и плавно подтянуть его к груди.</div>
+      <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
+      <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
+      <div class="row important"><b>Важно:</b> Поясница остаётся прижатой к полу, без боли в колене или пояснице.</div>
+      <div class="tags"><span class="tag new">без нагрузки на поясницу</span></div>
+    </div>
+  </div>
+
+  <div class="card" data-id="20">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">20</div>
+        <h3 class="card-title">Лежание с ногами на стуле</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Лёжа на спине, положить голени на сиденье стула так, чтобы колени и таз были под углом 90°. Руки вдоль тела.</div>
+      <div class="row"><b>Дыхание:</b> Глубокое и расслабленное.</div>
+      <div class="row"><b>Время:</b> 5–10 минут.</div>
+      <div class="row important"><b>Важно:</b> Поясница полностью расслаблена, прижата к полу.</div>
+    </div>
+  </div>
+
+  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Блок «с резинкой» — дополнение, не обязателен каждый раз: начни с 16-19, бери лёгкую резинку.</footer>
+</div>
+
+<script>
+const KEY = 'back-routine-done-v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; } }
+function save(){
+  try{
+    const ids = [...document.querySelectorAll('.card.done')].map(c => c.dataset.id);
+    localStorage.setItem(KEY, JSON.stringify(ids));
+  }catch(e){}
+}
+function toggleCard(headEl){
+  const card = headEl.closest('.card');
+  card.classList.toggle('done');
+  headEl.querySelector('.checkbox').classList.toggle('checked');
+  updateProgress();
+  save();
+}
+function resetAll(){
+  document.querySelectorAll('.card.done').forEach(c => {
+    c.classList.remove('done');
+    c.querySelector('.checkbox').classList.remove('checked');
+  });
+  updateProgress();
+  save();
+}
+function updateProgress(){
+  const total = document.querySelectorAll('.card').length;
+  const done = document.querySelectorAll('.card.done').length;
+  document.getElementById('progressFill').style.width = Math.round(done/total*100) + '%';
+  document.getElementById('progressLabel').textContent = done + ' из ' + total + ' выполнено';
+}
+document.querySelectorAll('.card-head').forEach(h => {
+  h.setAttribute('role','button'); h.setAttribute('tabindex','0');
+  h.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleCard(h); } });
+});
+load().forEach(id => {
+  const card = document.querySelector('.card[data-id="'+id+'"]');
+  if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
+});
+updateProgress();
+</script>
+</body>
+</html>
