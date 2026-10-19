@@ -204,6 +204,16 @@
   .toolbar button:hover{ color: var(--text); border-color: var(--accent); }
   body{ padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
   .card-head:focus-visible, .toolbar button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  details.demo{margin:0 0 12px;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,0.02)}
+  details.demo summary{cursor:pointer;list-style:none;padding:10px 14px;color:var(--accent);font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+  details.demo summary::-webkit-details-marker{display:none}
+  details.demo summary::before{content:"▸";display:inline-block;transition:transform .2s}
+  details.demo[open] summary::before{transform:rotate(90deg)}
+  .demo-box{padding:0 10px 10px}
+  .demo-canvas{display:block;width:100%;height:auto;border-radius:8px;background:#0e0e13;cursor:pointer}
+  .demo-cap{margin-top:8px;font-size:13px;color:var(--text-dim);line-height:1.45}
+  .demo-hint{margin-top:4px;font-size:11px;color:#6b6b78}
 </style>
 </head>
 <body>
@@ -241,6 +251,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="1"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> На четвереньках. На вдохе прогнуться, взгляд вверх. На выдохе округлить спину, подбородок к груди.</div>
       <div class="row"><b>Дыхание:</b> Вдох на прогибе, выдох на округлении.</div>
       <div class="row"><b>Подходы:</b> 10–12 медленных повторов.</div>
@@ -256,6 +267,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="2"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Руки на животе. Вдох носом — медленно надуть живот, выдох ртом — втянуть живот.</div>
       <div class="row"><b>Дыхание:</b> Вдох 3–4 сек, выдох 5–6 сек.</div>
       <div class="row"><b>Подходы:</b> 5–7 дыхательных циклов.</div>
@@ -273,6 +285,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="3"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Медленно выпрямить одну ногу, скользя пяткой по полу. Вернуть в исходное положение.</div>
       <div class="row"><b>Дыхание:</b> Выдох — на выпрямлении, вдох — на возврате.</div>
       <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
@@ -288,6 +301,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="4"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, оба колена подняты и согнуты под 90° (положение «стол»), руки лежат вдоль тела или на бёдрах. На выдохе медленно выпрямить и опустить одну ногу вперёд-вниз, не касаясь пола. На вдохе вернуть колено обратно в исходное положение. Повторить на другую ногу.</div>
       <div class="row"><b>Дыхание:</b> Выдох — на опускании ноги, вдох — на возврате.</div>
       <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
@@ -304,6 +318,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="5"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. На выдохе поднять таз, сжав ягодицы. Задержаться 2–3 сек. На вдохе опустить.</div>
       <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох при опускании.</div>
       <div class="row"><b>Подходы:</b> 10–12 раз.</div>
@@ -319,6 +334,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="6"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Резинка выше колен. Лёжа на спине, ноги согнуты, стопы на ширине таза. На выдохе поднять таз, одновременно слегка разводя колени против резинки (не сильно, просто не давая им сводиться). Задержаться 2 сек, опустить.</div>
       <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох при опускании.</div>
       <div class="row"><b>Подходы:</b> 10–12 раз.</div>
@@ -335,6 +351,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="7"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, поднять согнутые ноги. Поочерёдно выпрямлять и сгибать ноги, имитируя кручение педалей велосипеда. Можно поднять ноги чуть выше для лучшего оттока.</div>
       <div class="row"><b>Дыхание:</b> Ровное и свободное, не задерживать.</div>
       <div class="row"><b>Подходы:</b> 20–30 секунд (30–40 «прокрутов»).</div>
@@ -353,6 +370,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="8"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> На четвереньках. На выдохе одновременно вытянуть правую руку вперёд и левую ногу назад в одну линию с корпусом. Задержаться 1–2 сек, вернуться. Затем — левая рука и правая нога.</div>
       <div class="row"><b>Дыхание:</b> Выдох на вытягивании, вдох — возврат.</div>
       <div class="row"><b>Подходы:</b> 8–10 раз на каждую сторону.</div>
@@ -368,6 +386,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="9"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Резинка выше колен. На четвереньках, как в упражнении «собака». На выдохе отвести согнутую в колене ногу в сторону и чуть назад, против резинки. На вдохе вернуть.</div>
       <div class="row"><b>Дыхание:</b> Выдох на движении, вдох — возврат.</div>
       <div class="row"><b>Подходы:</b> 8–10 раз на каждую ногу.</div>
@@ -384,6 +403,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="10"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Резинка выше колен. Лечь на бок, колени согнуты примерно под 90°, стопы вместе. Опираясь на локоть, на выдохе поднять верхнее колено вверх, не разводя стопы. На вдохе опустить.</div>
       <div class="row"><b>Дыхание:</b> Выдох на подъёме колена, вдох на опускании.</div>
       <div class="row"><b>Подходы:</b> 10–12 раз на каждую сторону.</div>
@@ -400,6 +420,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="11"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Резинка выше колен. Сидя на стуле, спина прямая, стопы на полу на ширине таза. На выдохе развести колени в стороны против резинки, задержаться 1–2 сек, на вдохе свести обратно.</div>
       <div class="row"><b>Дыхание:</b> Выдох на разведении, вдох на сведении.</div>
       <div class="row"><b>Подходы:</b> 12–15 раз.</div>
@@ -418,6 +439,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="12"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Спина и затылок прижаты к стене, ноги на ширине плеч, стопы чуть впереди. Согнуть колени примерно до 90° (или меньше, насколько комфортно), как будто садишься на невидимый стул. Удерживать позу.</div>
       <div class="row"><b>Дыхание:</b> Ровное, не задерживать, дышать через удержание.</div>
       <div class="row"><b>Подходы:</b> 3 раза по 15–30 секунд.</div>
@@ -434,6 +456,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="13"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Встать перед стулом, ноги на ширине плеч. Медленно отвести таз назад и присесть, слегка коснувшись стула ягодицами, не садясь полностью. Подняться обратно.</div>
       <div class="row"><b>Дыхание:</b> Вдох на опускании, выдох на подъёме.</div>
       <div class="row"><b>Подходы:</b> 10–12 раз.</div>
@@ -450,6 +473,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="14"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Настроить упор так, чтобы валик находился в области паха/верха бедра, а не на пояснице. Из положения корпус вниз (спина округлена расслабленно) на выдохе плавно поднять корпус до ровной линии с ногами — не выше, без переразгибания в пояснице. На вдохе так же плавно опустить обратно.</div>
       <div class="row"><b>Дыхание:</b> Выдох на подъёме, вдох на опускании.</div>
       <div class="row"><b>Подходы:</b> 2–3 подхода по 10–12 раз, начиная с небольшой амплитуды.</div>
@@ -466,6 +490,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="15"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Резинка выше колен. Встать, ноги на ширине плеч, лёгкое приседание. Сделать 8–10 небольших шагов в одну сторону, сохраняя натяжение резинки, затем столько же обратно.</div>
       <div class="row"><b>Дыхание:</b> Ровное, не задерживать.</div>
       <div class="row"><b>Подходы:</b> 2 прохода в каждую сторону.</div>
@@ -484,6 +509,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="16"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Встать в дверном проёме, предплечье и локоть упереть в раму под углом примерно 90°. Мягко шагнуть вперёд, пока не почувствуется растяжение в груди/переднем плече.</div>
       <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
       <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
@@ -501,6 +527,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="17"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Поднять руку вверх, согнуть в локте, кисть завести за голову. Другой рукой аккуратно потянуть локоть вниз-назад.</div>
       <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
       <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
@@ -518,6 +545,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="18"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Одна рука заводится через плечо сверху (локоть вверх, ладонь к позвоночнику), другая — снизу вдоль поясницы (ладонь наружу). Если пальцы не встречаются, взять полотенце/ремешок: верхняя рука держит его сверху, нижняя перехватывает снизу. Постепенно, по чуть-чуть, перехватывать руки ближе друг к другу вдоль полотенца.</div>
       <div class="row"><b>Дыхание:</b> Глубокое и ровное, не задерживать.</div>
       <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону — обязательно обе, одна обычно даётся заметно легче.</div>
@@ -535,6 +563,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="19"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, ноги согнуты. Одну лодыжку положить на колено другой ноги (как цифра 4). Руками обхватить заднее бедро и плавно подтянуть его к груди.</div>
       <div class="row"><b>Дыхание:</b> Глубокое и ровное.</div>
       <div class="row"><b>Время:</b> 20–30 секунд на каждую сторону.</div>
@@ -552,6 +581,7 @@
       <div class="checkbox"></div>
     </div>
     <div class="card-body">
+      <details class="demo" data-ex="20"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Лёжа на спине, положить голени на сиденье стула так, чтобы колени и таз были под углом 90°. Руки вдоль тела.</div>
       <div class="row"><b>Дыхание:</b> Глубокое и расслабленное.</div>
       <div class="row"><b>Время:</b> 5–10 минут.</div>
@@ -562,6 +592,7 @@
   <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Блок «с резинкой» — дополнение, не обязателен каждый раз: начни с 16-19, бери лёгкую резинку.</footer>
 </div>
 
+<script src="anim.js" defer></script>
 <script>
 const KEY = 'back-routine-done-v1';
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; } }
