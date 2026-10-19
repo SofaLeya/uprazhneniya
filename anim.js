@@ -61,25 +61,54 @@ function Painter(ctx,cw,ch,v){
   this.text=function(t,x,y,col,size,align){ ctx.fillStyle=col; ctx.font='600 '+(size||13)+'px system-ui,sans-serif'; ctx.textAlign=align||'left'; ctx.fillText(t,x,y); };
   this.ctx=ctx; this.cw=cw; this.ch=ch;
 }
-function drawLimb(g,l,col,leg){
-  g.line(leg&&l.f?[l.root,l.j,l.e,l.f]:[l.root,l.j,l.e],col);
+var C={skin:'#f2c6a0',skinF:'#c49a7c',top:'#b98cff',leg:'#4f43a0',legF:'#3a3175',shoe:'#f2f2f5',shoeF:'#9a9aa6',hair:'#ff7fbf',hairD:'#d9559a',eye:'#2a2030'};
+function drawArm(g,l,far){
+  g.line([l.root,l.j],far?COL.far:C.top,.13);
+  g.line([l.j,l.e],far?C.skinF:C.skin,.095);
+  g.circ(l.e,.062,far?C.skinF:C.skin);
+}
+function drawLeg(g,l,far){
+  g.line([l.root,l.j],far?C.legF:C.leg,.2);
+  g.line([l.j,l.e],far?C.legF:C.leg,.155);
+  if(l.f) g.line([l.e,l.f],far?C.shoeF:C.shoe,.1);
+}
+function drawHead(g,k){
+  var p=k.p, h=k.head, na=p.n*D;
+  if(p.back){
+    g.circ(h,.19,C.hair);
+    g.line([[h[0],h[1]-.1],[h[0]+.02,h[1]-.4]],C.hair,.1);
+    return;
+  }
+  if(p.front){
+    g.line([[h[0]+.15,h[1]],[h[0]+.27,h[1]-.28]],C.hair,.1);
+    g.circ(h,.195,C.hair);
+    g.circ([h[0],h[1]-.025],.155,C.skin);
+    g.circ([h[0]-.055,h[1]-.01],.017,C.eye); g.circ([h[0]+.055,h[1]-.01],.017,C.eye);
+    g.line([[h[0]-.035,h[1]-.07],[h[0],h[1]-.085],[h[0]+.035,h[1]-.07]],'#c26a6a',.012);
+    return;
+  }
+  var bk=na+Math.PI/2, fc=na-Math.PI/2, bx=Math.cos(bk), by=Math.sin(bk);
+  var tp=[h[0]+.15*bx,h[1]+.15*by], m1=[tp[0]+.2*bx,Math.max(.05,tp[1]+.2*by-.1)], m2=[m1[0]+.04*bx,Math.max(.05,m1[1]-.2)];
+  g.line([tp,m1,m2],C.hairD,.09);
+  g.circ([h[0]+.05*bx,h[1]+.05*by],.185,C.hair);
+  g.circ([h[0]+.025*Math.cos(fc),h[1]+.025*Math.sin(fc)],.15,C.skin);
+  g.circ([h[0]+.085*Math.cos(fc)+.03*Math.cos(na),h[1]+.085*Math.sin(fc)+.03*Math.sin(na)],.016,C.eye);
 }
 function drawSk(g,k,ex){
-  var p=k.p, dim=!p.front;
-  var far=dim?COL.far:COL.body;
-  // дальние конечности
-  drawLimb(g,k.legs[1],far,true); drawLimb(g,k.arms[1],far,false);
-  if(p.front){ g.line([[k.legs[0].root[0],k.hip[1]],[k.legs[1].root[0],k.hip[1]]],COL.body,.09); g.line([[k.arms[0].root[0],k.sh[1]],[k.arms[1].root[0],k.sh[1]]],COL.body,.09); }
-  // туловище и голова
-  g.line([k.hip,k.mid,k.sh,k.neck],COL.body,.08);
-  g.circ(k.head,HR,COL.body);
+  var p=k.p, side=!p.front&&!p.back, tw=side?.3:.36;
+  k.legs[1]&&drawLeg(g,k.legs[1],side); k.arms[1]&&drawArm(g,k.arms[1],side);
+  if(!side) g.line([[k.legs[0].root[0],k.hip[1]],[k.legs[1].root[0],k.hip[1]]],C.leg,.26);
+  g.line([k.hip,k.mid],C.top,tw); g.line([k.mid,k.sh],C.top,tw-.02);
+  g.circ(k.hip,.14,C.leg);
+  if(!side) g.line([[k.arms[0].root[0],k.sh[1]],[k.arms[1].root[0],k.sh[1]]],C.top,.14);
+  g.line([k.sh,k.neck],C.skin,.09);
   if(p.belly!=null){
     var cx=(k.hip[0]+k.mid[0])/2-.02, cy=k.hip[1];
-    var c=g.ctx; c.beginPath(); c.ellipse(g.X(cx),g.Y(cy+.04),.3*g.s,p.belly*g.s,0,Math.PI,0);
-    c.strokeStyle=COL.body; c.lineWidth=.05*g.s; c.stroke();
+    var c=g.ctx; c.beginPath(); c.ellipse(g.X(cx),g.Y(cy+.1),.3*g.s,p.belly*g.s,0,Math.PI,0);
+    c.strokeStyle=C.top; c.lineWidth=.06*g.s; c.stroke();
   }
-  // ближние конечности
-  drawLimb(g,k.legs[0],COL.body,true); drawLimb(g,k.arms[0],COL.body,false);
+  drawHead(g,k);
+  drawLeg(g,k.legs[0],false); drawArm(g,k.arms[0],false);
 }
 function chair(g,x0,x1,y,backAt){
   g.line([[x0,y],[x1,y]],COL.prop,.06); g.line([[x0,y],[x0,0]],COL.prop,.05); g.line([[x1,y],[x1,0]],COL.prop,.05);
@@ -178,7 +207,7 @@ EX[7]={loop:true,period:3.2,pose:function(ph){
 /* 9. Отведение ноги в «собаке» с резинкой (вид сзади) */
 (function(){
   function p(k){
-    return {front:true,hip:[0,.86],t:[90,90],ts:.35,n:90,hw:.2,sw:.32,
+    return {back:true,front:true,hip:[0,.86],t:[90,90],ts:.35,n:90,hw:.2,sw:.32,
       arms:[{ik:[.32,.04],b:1},{ik:[-.32,.04],b:-1}],
       legs:[{k:k[0],to:k[1],f:-90,rel:false},{k:[-.2,.06],to:[-.2,.02],f:-90}]};
   }
@@ -307,7 +336,7 @@ EX[15]={loop:true,period:5,pose:function(ph){
 (function(){
   function p(q){
     var gap=lerp(.45,.1,q), y=2.25;
-    return {front:true,hip:[0,1.66],t:[90,90],n:90,hw:.12,sw:.28,
+    return {back:true,front:true,hip:[0,1.66],t:[90,90],n:90,hw:.12,sw:.28,
       arms:[{k:[.3,2.98],to:[.04,y+gap/2]},{k:[-.38,1.95],to:[-.02,y-gap/2]}],
       legs:[{ik:[.2,.08],b:1,f:0},{ik:[-.2,.08],b:-1,f:180}],gap:gap,y:y};
   }
@@ -346,8 +375,54 @@ EX[15]={loop:true,period:5,pose:function(ph){
 })();
 
 var VIEWS={1:[3.6,1.3,-.3],2:[3.6,1.2,.15],3:[3.6,1.2,.15],4:[3.6,1.5,.15],5:[3.6,1.2,.15],6:[3.6,1.2,.15],7:[3.6,1.6,.15],8:[4.4,1.4,-.35],9:[2.8,1.9,.3],10:[3.4,1.1,.1],11:[3,2.5,0],12:[3.4,3,-.3],13:[4.2,3.2,-.3],14:[4,2.6,-.2],15:[3.6,3,0],16:[3.6,3.3,.1],17:[2.6,3.3,0],18:[2.6,3.3,0],19:[3.6,1.5,.15],20:[4,2,.4]};
-for(var vi in VIEWS) EX[vi].view=VIEWS[vi];
+for(var vi in VIEWS){ EX[vi].view=VIEWS[vi]; EX[vi].id=+vi; }
 [6,9,10,11,15,18].forEach(function(i){EX[i].propsFront=true;});
+
+
+/* ---------- подсветка мышц ---------- */
+var MUS={
+ 1:{work:'мышцы спины и кора',m:[['back'],['core']]},
+ 2:{work:'диафрагма и глубокие мышцы живота',m:[['core']]},
+ 3:{work:'глубокие мышцы живота, бёдра',m:[['core'],['thigh',[0]]]},
+ 4:{work:'глубокие мышцы живота, сгибатели бедра',m:[['core'],['thigh',[0,1]]]},
+ 5:{work:'ягодицы, задняя поверхность бёдер',m:[['glute'],['thigh',[0,1]]]},
+ 6:{work:'ягодицы (в том числе боковые), бёдра',m:[['glute'],['thigh',[0,1]]]},
+ 7:{work:'мышцы живота, бёдра',m:[['core'],['thigh',[0,1]]]},
+ 8:{work:'спина, ягодицы, кор',m:[['back'],['glute'],['core']]},
+ 9:{work:'ягодица и внешняя сторона бедра',m:[['glute',[0]],['thigh',[0]]]},
+ 10:{work:'боковые ягодичные мышцы',m:[['glute',[0]]]},
+ 11:{work:'внешняя сторона бёдер и ягодицы',m:[['glute'],['thigh',[0,1]]]},
+ 12:{work:'квадрицепсы (передняя часть бёдер), ягодицы',m:[['thigh',[0,1]],['glute']]},
+ 13:{work:'квадрицепсы и ягодицы',m:[['thigh',[0,1]],['glute']]},
+ 14:{work:'разгибатели спины, ягодицы, задняя часть бёдер',m:[['back'],['glute'],['thigh',[0,1]]]},
+ 15:{work:'ягодицы, внешняя сторона бёдер',m:[['glute'],['thigh',[0,1]]]},
+ 16:{stretch:'грудь и переднее плечо',m:[['chest','s'],['shoulder','s',[0]]]},
+ 17:{stretch:'трицепс и плечо',m:[['arm','s',[0]],['shoulder','s',[0]]]},
+ 18:{stretch:'плечи, трицепс, грудь',m:[['arm','s',[0,1]],['shoulder','s',[0,1]]]},
+ 19:{stretch:'ягодицы и грушевидная мышца',m:[['glute','s',[0]]]},
+ 20:{stretch:'поясница и сгибатели бедра: расслабляются',m:[['back','s'],['core','s']]}
+};
+function drawMuscles(g,k,ex,p){
+  var M=MUS[ex.id]; if(!M) return;
+  var side=!k.p.front&&!k.p.back;
+  M.m.forEach(function(m){
+    var kind=m[0], st=(m[1]==='s'), legs=(m[1]==='s'?m[2]:m[1]);
+    var col=st?'rgba(64,224,208,':'rgba(255,77,109,', a=st?.5:.35+.4*p;
+    if(ex.loop) a=.65; if(st) a=.35+.3*Math.sin(Date.now()/500);
+    var c=col+a+')';
+    function L(idx,fn){ (idx||[0,1]).forEach(function(i){ var x=fn(i); if(x) x(); }); }
+    if(kind==='core') g.line([k.hip,k.mid],c,.34);
+    else if(kind==='back'){ g.line([k.hip,k.mid,k.sh],c,.34); }
+    else if(kind==='chest') g.circ([(k.mid[0]+k.sh[0])/2,(k.mid[1]+k.sh[1])/2+.08],.2,c);
+    else if(kind==='glute'){
+      if(side) g.circ(k.hip,.2,c);
+      else (legs||[0,1]).forEach(function(i){ g.circ(k.legs[i].root,.17,c); });
+    }
+    else if(kind==='thigh'){ (legs||[0]).forEach(function(i){ var l=k.legs[i]; g.line([l.root,l.j],c,.24); }); }
+    else if(kind==='arm'){ (legs||[0]).forEach(function(i){ var l=k.arms[i]; g.line([l.root,l.j],c,.17); }); }
+    else if(kind==='shoulder'){ (legs||[0]).forEach(function(i){ g.circ(k.arms[i].root,.14,c); }); }
+  });
+}
 
 /* ---------- плеер ---------- */
 function easeC(x){ return .5-.5*Math.cos(Math.PI*x); }
@@ -377,6 +452,7 @@ function render(canvas,ex,t){
   if(ex.props&&!ex.propsFront) ex.props(g,k);
   drawSk(g,k,ex);
   if(ex.props&&ex.propsFront) ex.props(g,k);
+  drawMuscles(g,k,ex,pp.p);
   var text=ex.label?ex.label(pp.ph,pp.p):'';
   if(text) g.text(text,10,18,COL.ink,Math.max(12,Math.min(15,Math.round(w/26))),'left');
   return pp;
@@ -390,7 +466,9 @@ function mount(box,id){
   cv.setAttribute('aria-label','Схематичная анимация упражнения');
   var cap=document.createElement('div'); cap.className='demo-cap'; cap.textContent=ex.cap||'';
   var hint=document.createElement('div'); hint.className='demo-hint'; hint.textContent='Нажми на картинку — пауза';
-  box.appendChild(cv); box.appendChild(cap); box.appendChild(hint);
+  var M=MUS[id], leg=document.createElement('div'); leg.className='demo-mus';
+  leg.innerHTML=M.work?'<span class="dot work"></span>Работают: '+M.work:'<span class="dot str"></span>Растягиваются: '+M.stretch;
+  box.appendChild(cv); box.appendChild(leg); box.appendChild(cap); box.appendChild(hint);
   var t0=performance.now(), raf=0, paused=false, tPaused=0, running=false;
   function frame(now){
     if(!running) return;
