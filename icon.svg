@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a63ff"/>
+      <stop offset="1" stop-color="#4b32c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- spine: five rounded vertebrae along a gentle S-curve -->
+  <g fill="#fff">
+    <rect x="206" y="96"  width="100" height="52" rx="26" transform="rotate(-6 256 122)"/>
+    <rect x="200" y="164" width="112" height="56" rx="28" transform="rotate(-2 256 192)"/>
+    <rect x="196" y="236" width="120" height="58" rx="29" transform="rotate(3 256 265)"/>
+    <rect x="198" y="310" width="116" height="56" rx="28" transform="rotate(6 256 338)"/>
+    <rect x="204" y="382" width="104" height="52" rx="26" transform="rotate(4 256 408)"/>
+  </g>
+</svg>
