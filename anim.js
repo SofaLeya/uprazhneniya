@@ -438,55 +438,189 @@ for(var vi in VIEWS){ EX[vi].view=VIEWS[vi]; EX[vi].id=+vi; }
 [6,9,10,11,15,18].forEach(function(i){EX[i].propsFront=true;});
 
 
-/* ---------- подсветка мышц ---------- */
-var MUS={
- 1:{work:'мышцы спины и кора',m:[['back'],['core']]},
- 2:{work:'диафрагма и глубокие мышцы живота',m:[['core']]},
- 3:{work:'глубокие мышцы живота, бёдра',m:[['core'],['thigh',[0]]]},
- 4:{work:'глубокие мышцы живота, сгибатели бедра',m:[['core'],['thigh',[0,1]]]},
- 5:{work:'ягодицы, задняя поверхность бёдер',m:[['glute'],['thigh',[0,1]]]},
- 6:{work:'ягодицы (в том числе боковые), бёдра',m:[['glute'],['thigh',[0,1]]]},
- 7:{work:'мышцы живота, бёдра',m:[['core'],['thigh',[0,1]]]},
- 8:{work:'спина, ягодицы, кор',m:[['back'],['glute'],['core']]},
- 9:{work:'ягодица и внешняя сторона бедра',m:[['glute',[0]],['thigh',[0]]]},
- 10:{work:'боковые ягодичные мышцы',m:[['glute',[0]]]},
- 11:{work:'внешняя сторона бёдер и ягодицы',m:[['glute'],['thigh',[0,1]]]},
- 12:{work:'квадрицепсы (передняя часть бёдер), ягодицы',m:[['thigh',[0,1]],['glute']]},
- 13:{work:'квадрицепсы и ягодицы',m:[['thigh',[0,1]],['glute']]},
- 14:{work:'разгибатели спины, ягодицы, задняя часть бёдер',m:[['back'],['glute'],['thigh',[0,1]]]},
- 15:{work:'ягодицы, внешняя сторона бёдер',m:[['glute'],['thigh',[0,1]]]},
- 16:{stretch:'грудь и переднее плечо',m:[['chest','s'],['shoulder','s',[0]]]},
- 17:{stretch:'трицепс и плечо',m:[['arm','s',[0]],['shoulder','s',[0]]]},
- 18:{stretch:'плечи, трицепс, грудь',m:[['arm','s',[0,1]],['shoulder','s',[0,1]]]},
- 19:{stretch:'ягодицы и грушевидная мышца',m:[['glute','s',[0]]]},
- 20:{stretch:'поясница и сгибатели бедра: расслабляются',m:[['back','s'],['core','s']]},
- 21:{work:'грудь, трицепс, передняя часть плеча',m:[['chest'],['arm',[0]],['shoulder',[0]]]},
- 22:{work:'мышцы между лопаток и средняя часть спины',m:[['upback'],['arm',[0]]]},
- 23:{work:'задняя часть плеч и мышцы между лопаток',m:[['upback'],['shoulder',[0,1]]]},
- 24:{work:'мышцы между лопаток и плечи, подвижность плеч',m:[['shoulder',[0,1]],['arm',[0,1]]]}
-};
-function drawMuscles(g,k,ex,p){
-  var M=MUS[ex.id]; if(!M) return;
-  var side=!k.p.front&&!k.p.back;
-  M.m.forEach(function(m){
-    var kind=m[0], st=(m[1]==='s'), legs=(m[1]==='s'?m[2]:m[1]);
-    var col=st?'rgba(64,224,208,':'rgba(255,77,109,', a=st?.5:.35+.4*p;
-    if(ex.loop) a=.65; if(st) a=.35+.3*Math.sin(Date.now()/500);
-    var c=col+a+')';
-    function L(idx,fn){ (idx||[0,1]).forEach(function(i){ var x=fn(i); if(x) x(); }); }
-    if(kind==='core') g.line([k.hip,k.mid],c,.34);
-    else if(kind==='back'){ g.line([k.hip,k.mid,k.sh],c,.34); }
-    else if(kind==='upback') g.circ([k.sh[0]*.6+k.mid[0]*.4,k.sh[1]*.6+k.mid[1]*.4],.2,c);
-    else if(kind==='chest') g.circ([(k.mid[0]+k.sh[0])/2,(k.mid[1]+k.sh[1])/2+.08],.2,c);
-    else if(kind==='glute'){
-      if(side) g.circ(k.hip,.2,c);
-      else (legs||[0,1]).forEach(function(i){ g.circ(k.legs[i].root,.17,c); });
-    }
-    else if(kind==='thigh'){ (legs||[0]).forEach(function(i){ var l=k.legs[i]; g.line([l.root,l.j],c,.24); }); }
-    else if(kind==='arm'){ (legs||[0]).forEach(function(i){ var l=k.arms[i]; g.line([l.root,l.j],c,.17); }); }
-    else if(kind==='shoulder'){ (legs||[0]).forEach(function(i){ g.circ(k.arms[i].root,.14,c); }); }
-  });
+
+/* ---------- плоская анатомическая модель ---------- */
+var A={base:'#575766',baseF:'#41414d',idle:'#777789',idleF:'#5b5b6b',edge:'#a4a4b8',edgeF:'#767688',work:[255,77,109],str:[64,224,208]};
+function rgba(c,a){ return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'; }
+function wf(arr,t){ var n=arr.length-1, x=Math.min(1,Math.max(0,t))*n, i=Math.min(n-1,Math.floor(x)), f=x-i; return arr[i]*(1-f)+arr[i+1]*f; }
+function mkPath(pts){ var L=[0],i; for(i=1;i<pts.length;i++) L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1])); return {pts:pts,L:L,T:L[L.length-1]||1e-6}; }
+function onPath(P,t){
+  var d=t*P.T, n=P.pts.length-1, i=0;
+  if(d>=P.T) i=n-1; else if(d>0){ while(i<n-1&&P.L[i+1]<d) i++; }
+  var a=P.pts[i], b=P.pts[i+1], sl=(P.L[i+1]-P.L[i])||1e-6, f=(d-P.L[i])/sl;
+  return {p:[a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f],a:Math.atan2(b[1]-a[1],b[0]-a[0])};
 }
+function mkPart(pts,fw,bw,sg){ return {P:mkPath(pts),fw:fw,bw:bw,sg:sg}; }
+function wp(part,t,s){
+  var o=onPath(part.P,t), w=(s>=0?wf(part.fw,t):wf(part.bw,t)), off=s*w*part.sg;
+  return [o.p[0]-Math.sin(o.a)*off,o.p[1]+Math.cos(o.a)*off];
+}
+function blob(g,pts,fill,stroke,lw){
+  var c=g.ctx, n=pts.length, m0=[(pts[n-1][0]+pts[0][0])/2,(pts[n-1][1]+pts[0][1])/2];
+  c.beginPath(); c.moveTo(g.X(m0[0]),g.Y(m0[1]));
+  for(var i=0;i<n;i++){ var a=pts[i], b=pts[(i+1)%n]; c.quadraticCurveTo(g.X(a[0]),g.Y(a[1]),g.X((a[0]+b[0])/2),g.Y((a[1]+b[1])/2)); }
+  c.closePath(); c.fillStyle=fill; c.fill();
+  if(stroke){ c.strokeStyle=stroke; c.lineWidth=(lw||.012)*g.s; c.lineJoin='round'; c.stroke(); }
+}
+function silh(g,part,fill){
+  var pts=[wp(part,-.05,0)], i, N=6;
+  for(i=0;i<=N;i++) pts.push(wp(part,i/N,1));
+  pts.push(wp(part,1.05,0));
+  for(i=N;i>=0;i--) pts.push(wp(part,i/N,-1));
+  blob(g,pts,fill);
+}
+function poly(g,part,P,mir,fill,stroke){
+  var pts=P.map(function(q){ return wp(part,q[0],q[1]); }); blob(g,pts,fill,stroke);
+  if(mir){ var pm=P.map(function(q){ return wp(part,q[0],-q[1]); }); blob(g,pm,fill,stroke); }
+}
+function mstate(ex,key,idx,far,pp){
+  var list=(ex.act||[]), st=null;
+  for(var i=0;i<list.length;i++){ var m=list[i]; if(m[0]!==key) continue; if(!m[1]||idx==null||m[1].indexOf(idx)>=0) st=m[2]; }
+  if(!st) return {fill:far?A.idleF:A.idle,edge:far?A.edgeF:A.edge,glow:null};
+  var a=st==='w'?(ex.loop?.9:.6+.4*pp.p):.7+.25*Math.sin(Date.now()/450);
+  return {fill:rgba(st==='w'?A.work:A.str,a),edge:st==='w'?'rgba(255,200,210,.9)':'rgba(200,255,250,.9)',glow:st==='w'?'rgb(255,77,109)':'rgb(64,224,208)'};
+}
+function mus(g,part,P,mir,m){
+  var c=g.ctx; if(m.glow){ c.save(); c.shadowColor=m.glow; c.shadowBlur=14; poly(g,part,P,mir,m.fill,m.edge); c.restore(); }
+  else poly(g,part,P,mir,m.fill,m.edge);
+}
+/* формы мышц в локальных координатах: t вдоль сегмента, s поперёк (+1 спереди / -1 сзади, в видах спереди/сзади — вбок) */
+var SHP={
+ quad:[[.05,.1],[.1,.85],[.4,1],[.75,.9],[.98,.6],[.98,.1],[.5,.15]],
+ ham:[[.05,-.1],[.1,-.85],[.4,-1],[.75,-.9],[.98,-.55],[.98,-.1],[.5,-.15]],
+ glute:[[-.35,-.1],[-.28,-.8],[-.05,-1.25],[.2,-1.2],[.38,-.8],[.3,-.2],[.1,.1]],
+ calf:[[.04,-.15],[.1,-.9],[.3,-1.25],[.55,-.95],[.8,-.5],[.95,-.12]],
+ tib:[[.05,.15],[.1,.85],[.6,.7],[.9,.3],[.9,.1]],
+ delt:[[-.25,-.9],[-.25,.9],[.25,1.1],[.5,.5],[.5,-.5],[.25,-1.1]],
+ bi:[[.2,.1],[.35,.95],[.65,1.0],[.9,.5],[.9,.1]],
+ tri:[[.15,-.1],[.2,-.95],[.55,-1.05],[.9,-.6],[.9,-.1]],
+ fa:[[.05,-.7],[.05,.7],[.5,.9],[.95,.35],[.95,-.35],[.5,-.9]],
+ abs:[[.04,.95],[.5,1.0],[.5,.25],[.04,.3]],
+ erector:[[.02,-.95],[.2,-1],[.7,-.95],[.7,-.35],[.02,-.4]],
+ upback:[[.45,-.95],[.8,-1.0],[.98,-.6],[.95,-.15],[.5,-.3]],
+ chest:[[.6,.95],[.85,1.0],[.98,.75],[.95,.3],[.62,.3]]
+};
+var FB={
+ abs:[[.04,-.28],[.04,.28],[.52,.3],[.52,-.28]],
+ obl:[[.06,.4],[.06,.95],[.5,.92],[.52,.38]],
+ pec:[[.62,.05],[.62,.9],[.82,1.0],[.97,.85],[.92,.15]],
+ trap:[[.98,.02],[.98,.92],[.6,.55],[.3,.1],[.6,.02]],
+ lat:[[.2,.3],[.35,.95],[.8,.95],[.6,.35]],
+ erector:[[.02,.1],[.7,.1],[.7,.32],[.02,.32]],
+ glute:[[-.45,-.2],[-.35,.9],[0,1.2],[.3,.8],[.3,-.8],[-.1,-1.1]],
+ leg:[[.03,-.8],[.2,-1],[.6,-.9],[.95,-.5],[.95,.5],[.6,.9],[.2,1],[.03,.8]],
+ calf:[[.05,-.7],[.15,-.9],[.5,-.8],[.9,-.3],[.9,.3],[.5,.8],[.15,.9],[.05,.7]],
+ arm:[[.1,-.75],[.4,-.95],[.75,-.8],[.9,-.3],[.9,.3],[.75,.8],[.4,.95],[.1,.75]]
+};
+function parts(k,fb){
+  var o={legs:[],arms:[]}, H=k.hip,M=k.mid,S=k.sh;
+  k.legs.forEach(function(l){
+    o.legs.push({th:mkPart([l.root,l.j],[.105,.11,.085,.068],[.105,.12,.085,.065],1),sh:mkPart([l.j,l.e],[.068,.06,.046,.04],[.068,.085,.05,.04],1),l:l});
+  });
+  k.arms.forEach(function(l){
+    o.arms.push({up:mkPart([l.root,l.j],[.058,.058,.048,.042],[.058,.058,.048,.042],1),fo:mkPart([l.j,l.e],[.045,.045,.035,.03],[.045,.045,.035,.03],1),l:l});
+  });
+  o.torso=fb?mkPart([H,M,S],[.17,.155,.2,.24],[.17,.155,.2,.24],-1):mkPart([H,M,S],[.15,.14,.17,.13],[.16,.13,.15,.11],-1);
+  return o;
+}
+function legDraw(g,L,idx,far,ex,pp,fb,glt){
+  var base=far?A.baseF:A.base;
+  silh(g,L.th,base); silh(g,L.sh,base);
+  g.circ(L.l.j,.07,base);
+  if(L.l.f){ var f=L.l.f, e=L.l.e; blob(g,[[e[0]-.03,e[1]-.045],[f[0],f[1]-.035],[f[0]+.03,f[1]],[f[0],f[1]+.035],[e[0]-.03,e[1]+.045]].map(function(q){return q;}),base); }
+  var back=!!ex.back_;
+  if(!fb){
+    mus(g,L.th,SHP.quad,false,mstate(ex,'quad',idx,far,pp));
+    mus(g,L.th,SHP.ham,false,mstate(ex,'ham',idx,far,pp));
+    mus(g,L.sh,SHP.tib,false,mstate(ex,'tibx',idx,far,pp));
+    mus(g,L.sh,SHP.calf,false,mstate(ex,'calf',idx,far,pp));
+    if(glt) mus(g,L.th,SHP.glute,false,mstate(ex,'glute',null,far,pp));
+  } else {
+    if(back){
+      mus(g,L.th,FB.leg,false,mstate(ex,'ham',idx,far,pp));
+      mus(g,L.sh,FB.calf,false,mstate(ex,'calf',idx,far,pp));
+      mus(g,L.th,FB.glute,false,mstate(ex,'glute',idx,far,pp));
+    } else {
+      mus(g,L.th,FB.leg,false,mstate(ex,'quad',idx,far,pp));
+      mus(g,L.sh,FB.calf,false,mstate(ex,'tibx',idx,far,pp));
+    }
+  }
+}
+function armDraw(g,R,idx,far,ex,pp,fb){
+  var base=far?A.baseF:A.base;
+  silh(g,R.up,base); silh(g,R.fo,base); g.circ(R.l.j,.052,base); g.circ(R.l.e,.045,base);
+  if(!fb){
+    mus(g,R.fo,SHP.fa,false,mstate(ex,'fa',idx,far,pp));
+    mus(g,R.up,SHP.bi,false,mstate(ex,'bi',idx,far,pp));
+    mus(g,R.up,SHP.tri,false,mstate(ex,'tri',idx,far,pp));
+  } else {
+    mus(g,R.fo,FB.arm,false,mstate(ex,'fa',idx,far,pp));
+    mus(g,R.up,FB.arm,false,mstate(ex,ex.back_?'tri':'bi',idx,far,pp));
+  }
+}
+function deltDraw(g,R,idx,far,ex,pp,fb){
+  var m=mstate(ex,'delt',idx,far,pp);
+  mus(g,R.up,fb?[[-.35,-1.3],[-.35,1.3],[.3,1.5],[.55,.7],[.55,-.7],[.3,-1.5]]:SHP.delt,false,m);
+}
+function torsoDraw(g,T,k,ex,pp,fb){
+  silh(g,T,A.base);
+  var nk=k.neck, S=k.sh;
+  g.line([S,nk],A.base,.12);
+  if(!fb){
+    var m=mstate(ex,'abs',null,false,pp); mus(g,T,SHP.abs,false,m);
+    for(var i=1;i<4;i++){ var t=.04+.46*i/4; g.line([wp(T,t,.35),wp(T,t,.98)],A.edge,.01); }
+    if(k.p.belly!=null){ g.line([wp(T,.04,1.05+k.p.belly*5),wp(T,.27,1.12+k.p.belly*8),wp(T,.5,1.05+k.p.belly*5)],'#d9b79b',.03); }
+    mus(g,T,SHP.erector,false,mstate(ex,'erector',null,false,pp));
+    mus(g,T,SHP.upback,false,mstate(ex,'upback',null,false,pp));
+    mus(g,T,SHP.chest,false,mstate(ex,'chest',null,false,pp));
+  } else if(!k.p.back){
+    mus(g,T,FB.obl,true,mstate(ex,'obl',null,false,pp));
+    mus(g,T,FB.abs,false,mstate(ex,'abs',null,false,pp));
+    for(var j=1;j<4;j++){ var tt=.04+.48*j/4; g.line([wp(T,tt,-.28),wp(T,tt,.28)],A.edge,.01); }
+    g.line([wp(T,.04,0),wp(T,.52,0)],A.edge,.01);
+    mus(g,T,FB.pec,true,mstate(ex,'chest',null,false,pp));
+  } else {
+    mus(g,T,FB.lat,true,mstate(ex,'upback',null,false,pp));
+    mus(g,T,FB.trap,true,mstate(ex,'upback',null,false,pp));
+    mus(g,T,FB.erector,true,mstate(ex,'erector',null,false,pp));
+  }
+}
+function drawAnat(g,k,ex,pp){
+  var p=k.p, fb=!!(p.front||p.back); ex.back_=!!p.back;
+  var P=parts(k,fb);
+  if(fb){
+    P.legs.forEach(function(L,i){ legDraw(g,L,i,false,ex,pp,true,false); });
+    g.line([[k.legs[0].root[0],k.hip[1]],[k.legs[1].root[0],k.hip[1]]],A.base,.2);
+    torsoDraw(g,P.torso,k,ex,pp,true);
+    g.line([[k.arms[0].root[0],k.sh[1]],[k.arms[1].root[0],k.sh[1]]],A.base,.14);
+    drawHead(g,k);
+    P.arms.forEach(function(R,i){ armDraw(g,R,i,false,ex,pp,true); deltDraw(g,R,i,false,ex,pp,true); });
+    return;
+  }
+  legDraw(g,P.legs[1],1,true,ex,pp,false,false); armDraw(g,P.arms[1],1,true,ex,pp,false);
+  torsoDraw(g,P.torso,k,ex,pp,false);
+  drawHead(g,k);
+  legDraw(g,P.legs[0],0,false,ex,pp,false,true); armDraw(g,P.arms[0],0,false,ex,pp,false); deltDraw(g,P.arms[0],0,false,ex,pp,false);
+}
+var MUS={
+ 1:{work:'разгибатели спины, прямая мышца живота',m:[['erector',null,'w'],['abs',null,'w'],['upback',null,'w']]},
+ 2:{work:'прямая и поперечная мышцы живота, диафрагма',m:[['abs',null,'w']]},
+ 4:{work:'прямая мышца живота, четырёхглавая бедра',m:[['abs',null,'w'],['quad',null,'w']]},
+ 6:{work:'большая и средняя ягодичные, задняя поверхность бедра',m:[['glute',null,'w'],['ham',null,'w'],['erector',null,'w']]},
+ 8:{work:'разгибатели спины, большая ягодичная, дельты',m:[['erector',null,'w'],['glute',null,'w'],['delt',[0],'w'],['abs',null,'w'],['ham',[1],'w']]},
+ 10:{work:'средняя ягодичная мышца',m:[['glute',null,'w']]},
+ 12:{work:'четырёхглавая мышца бедра, ягодичные',m:[['quad',null,'w'],['glute',null,'w']]},
+ 14:{work:'разгибатели спины, большая ягодичная, двуглавая бедра',m:[['erector',null,'w'],['glute',null,'w'],['ham',null,'w']]},
+ 21:{work:'большая грудная, трицепс, передняя дельта',m:[['chest',null,'w'],['tri',[0],'w'],['delt',[0],'w']]},
+ 22:{work:'мышцы между лопаток (ромбовидные, трапеции), бицепс',m:[['upback',null,'w'],['bi',[0],'w'],['delt',[0],'w']]},
+ 24:{work:'дельты, трапеции и ромбовидные мышцы',m:[['delt',null,'w'],['upback',null,'w'],['tri',null,'w']]},
+ 16:{stretch:'большая грудная, передняя дельта',m:[['chest',null,'s'],['delt',[0],'s']]},
+ 17:{stretch:'трицепс, задняя дельта',m:[['tri',[0],'s'],['delt',[0],'s']]},
+ 18:{stretch:'трицепс, дельты, широчайшая',m:[['tri',null,'s'],['delt',null,'s'],['upback',null,'s']]},
+ 19:{stretch:'большая ягодичная и грушевидная',m:[['glute',null,'s']]},
+ 20:{stretch:'разгибатели спины (поясница), сгибатели бедра',m:[['erector',null,'s'],['abs',null,'s']]}
+};
+for(var mi in MUS){ if(EX[mi]) EX[mi].act=MUS[mi].m; }
 
 /* ---------- плеер ---------- */
 function easeC(x){ return .5-.5*Math.cos(Math.PI*x); }
@@ -514,9 +648,8 @@ function render(canvas,ex,t){
   }
   var k=skeleton(pose);
   if(ex.props&&!ex.propsFront) ex.props(g,k);
-  drawSk(g,k,ex);
+  drawAnat(g,k,ex,pp);
   if(ex.props&&ex.propsFront) ex.props(g,k);
-  drawMuscles(g,k,ex,pp.p);
   var text=ex.label?ex.label(pp.ph,pp.p):'';
   if(text) g.text(text,10,18,COL.ink,Math.max(12,Math.min(15,Math.round(w/26))),'left');
   return pp;
