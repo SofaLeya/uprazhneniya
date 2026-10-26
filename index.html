@@ -234,6 +234,8 @@
   .bdg{flex:1 1 30%;min-width:96px;text-align:center;border:1px solid var(--card-border);border-radius:12px;padding:8px 4px;font-size:11px;color:var(--text-dim);opacity:.5;filter:grayscale(1)}
   .bdg b{display:block;font-size:22px;font-weight:400;margin-bottom:2px}
   .bdg.got{opacity:1;filter:none;border-color:rgba(255,200,87,.6);background:rgba(255,200,87,.08);color:var(--text)}
+  .plan-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--card-border);font-size:13px;line-height:1.35}
+  .plan-row b{flex:none;width:58px;color:var(--accent)}
   .cheer{margin-top:8px;font-size:13px;color:#6ee7a8}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
@@ -646,7 +648,13 @@ function markDay(k){
   if(isTrained(log,d)) log[k] = -1; else if(log[k]===-1) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 5 : TOTAL;
   lset(LKEY, log); renderToday();
 }
-let histOpen = false;
+let histOpen = false, planOpen = false;
+const DESC = {1:'Тренировка: весь комплекс, около часа',3:'Облегчённая тренировка: подходов меньше, около часа',5:'Тренировка: весь комплекс, около часа',2:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',4:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',6:'Отдых. По желанию растяжка',0:'Отдых. По желанию растяжка'};
+function planHtml(now){
+  let r='';
+  for(let i=1;i<=7;i++){ const d=new Date(now); d.setDate(d.getDate()+i); r += '<div class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span></div>'; }
+  return '<details class="hist"'+(planOpen?' open':'')+' ontoggle="planOpen=this.open"><summary>Что ждёт в ближайшие дни</summary>'+r+'</details>';
+}
 function renderToday(){
   const el = document.getElementById('today'); if(!el) return;
   const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
@@ -716,7 +724,7 @@ function renderToday(){
   el.innerHTML = msg + cheer + '<div>'+sickBtn+'</div>' +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего: '+allN+
     (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>' +
-    '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary>История и награды'+(nextB?' · следующая: '+nextB.i+' '+nextB.n:'')+'</summary>'+cells+
+    planHtml(now) + '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary>История и награды'+(nextB?' · следующая: '+nextB.i+' '+nextB.n:'')+'</summary>'+cells+
     '<div class="stat">Прошедший день можно отметить вручную: нажми на него (✓ → 🤒 пауза → пусто). Пауза не рвёт серию.</div>'+badges+'</details>';
 }
 document.querySelectorAll('.card-head').forEach(h => {
