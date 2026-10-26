@@ -225,6 +225,8 @@
   .wd i{display:block;height:26px;margin-top:4px;border-radius:8px;border:1px solid var(--card-border);font-style:normal;font-size:13px;line-height:24px;color:var(--text-dim)}
   .wd.plan i{border-color:var(--accent)}
   .wd.ok i{background:rgba(110,231,168,.25);border-color:rgba(110,231,168,.6);color:#6ee7a8}
+  .wd.past{cursor:pointer}
+  .week-lbl{font-size:11px;color:var(--text-dim);margin-top:10px}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
   .hide{display:none!important}
@@ -618,6 +620,11 @@ function applyDay(){
   });
 }
 function toggleAll(){ showAll = !showAll; applyDay(); updateProgress(); renderToday(); }
+function markDay(k){
+  const log = lget(LKEY, {}), d = new Date(k+'T00:00:00');
+  if(isTrained(log,d)) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 7 : TOTAL;
+  lset(LKEY, log); renderToday();
+}
 function renderToday(){
   const el = document.getElementById('today'); if(!el) return;
   const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
@@ -629,16 +636,21 @@ function renderToday(){
   else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. После него короткий комплекс: разминка и растяжка, около 10 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
   else msg = '<b>Сегодня отдых.</b> Можно сделать растяжку, если хочется.';
   // неделя Пн..Вс
-  const mon = new Date(now); mon.setHours(0,0,0,0); mon.setDate(mon.getDate() - ((dow+6)%7));
+  const mon0 = new Date(now); mon0.setHours(0,0,0,0); mon0.setDate(mon0.getDate() - ((dow+6)%7));
   let cells='', weekN=0;
-  for(let i=0;i<7;i++){
-    const d = new Date(mon); d.setDate(mon.getDate()+i);
-    const wdow = d.getDay(), t = isTrained(log,d);
-    if(t && PLAN[wdow]==='train') weekN++;
-    const isNow = ymd(d)===ymd(now);
-    const cls = 'wd' + (t?' ok':'') + (PLAN[wdow]==='train'?' plan':'') + (isNow?' now':'');
-    const mark = t ? '✓' : (PLAN[wdow]==='bike' ? '🚴' : '');
-    cells += '<div class="'+cls+'"><span>'+DN[wdow]+'</span><i>'+mark+'</i></div>';
+  for(let w=2; w>=0; w--){
+    const mon = new Date(mon0); mon.setDate(mon0.getDate()-7*w);
+    cells += '<div class="week-lbl">'+(w===0?'Эта неделя':w===1?'Прошлая неделя':'Позапрошлая неделя')+'</div><div class="week">';
+    for(let i=0;i<7;i++){
+      const d = new Date(mon); d.setDate(mon.getDate()+i);
+      const wdow = d.getDay(), t = isTrained(log,d);
+      if(w===0 && t && PLAN[wdow]==='train') weekN++;
+      const isNow = ymd(d)===ymd(now), past = d < mon0 || (w===0 && !isNow && d < now);
+      const cls = 'wd' + (t?' ok':'') + (PLAN[wdow]==='train'?' plan':'') + (isNow?' now':'') + (past?' past':'');
+      const mark = t ? '✓' : (PLAN[wdow]==='bike' ? '🚴' : '');
+      cells += '<div class="'+cls+'"'+(past?' onclick="markDay(\''+ymd(d)+'\')"':'')+'><span>'+DN[wdow]+' '+d.getDate()+'</span><i>'+mark+'</i></div>';
+    }
+    cells += '</div>';
   }
   // серия: подряд выполненные дни тренировок (Пн/Ср/Пт), сегодняшний день без отметки не рвёт серию
   let streak=0;
@@ -648,9 +660,9 @@ function renderToday(){
     if(isTrained(log,d)) streak++; else if(i===0) continue; else break;
   }
   const allN = Object.keys(log).filter(k => { const d=new Date(k+'T00:00:00'); return PLAN[d.getDay()]==='train' && log[k] >= needFor(d); }).length;
-  el.innerHTML = msg + '<div class="week">'+cells+'</div>' +
+  el.innerHTML = msg + cells +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего тренировок: '+allN+
-    (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>';
+    (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div><div class="stat">Пропущенный день можно отметить вручную: нажми на него в прошлых днях.</div>';
 }
 document.querySelectorAll('.card-head').forEach(h => {
   h.setAttribute('role','button'); h.setAttribute('tabindex','0');
