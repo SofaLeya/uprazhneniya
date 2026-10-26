@@ -73,7 +73,7 @@ function drawLeg(g,l,far){
   if(l.f) g.line([l.e,l.f],far?C.shoeF:C.shoe,.1);
 }
 function drawHead(g,k){
-  var p=k.p, h=k.head, na=p.n*D;
+  var p=k.p, h=k.head, na=(p.hd!=null?p.hd:p.n)*D;
   if(p.back){
     g.circ(h,.19,C.hair);
     g.line([[h[0],h[1]-.1],[h[0]+.02,h[1]-.4]],C.hair,.1);
@@ -220,7 +220,7 @@ EX[7]={loop:true,period:3.2,pose:function(ph){
 /* 10. Моллюск */
 (function(){
   function p(k,ank){
-    return {hip:[0,.3],t:[180,180],n:180,
+    return {hip:[0,.3],t:[180,180],n:180,hd:90,
       arms:[{k:[-.95,.1],to:[-1.15,.28]},{k:[-.55,.1],to:[-.25,.12]}],
       legs:[{k:k,to:ank,f:20},{k:[.78,.12],to:[.1,.06],f:20}]};
   }
