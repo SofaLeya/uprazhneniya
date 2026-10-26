@@ -226,6 +226,8 @@
   .wd.plan i{border-color:var(--accent)}
   .wd.ok i{background:rgba(110,231,168,.25);border-color:rgba(110,231,168,.6);color:#6ee7a8}
   .wd.now span{color:var(--accent);font-weight:700}
+  .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
+  .hide{display:none!important}
   .stat{margin-top:8px;font-size:12px;color:var(--text-dim)}
 </style>
 </head>
@@ -539,7 +541,7 @@
     </div>
   </div>
 
-  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16.<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
+  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16 (по вт и чт: 5 из 7).<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
 </div>
 
 <script src="anim.js" defer></script>
@@ -577,22 +579,54 @@ function resetAll(){
   renderToday();
 }
 function updateProgress(){
-  const total = document.querySelectorAll('.card').length;
-  const done = document.querySelectorAll('.card.done').length;
+  const total = document.querySelectorAll('.card:not(.hide)').length;
+  const done = document.querySelectorAll('.card.done:not(.hide)').length;
   document.getElementById('progressFill').style.width = Math.round(done/total*100) + '%';
   document.getElementById('progressLabel').textContent = done + ' из ' + total + ' выполнено';
 }
 const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
 const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-function isTrained(log, d){ const total=document.querySelectorAll('.card').length; return (log[ymd(d)]||0) >= Math.ceil(total*NEED); }
+const TOTAL = document.querySelectorAll('.card').length;
+const BIKE_SHOW = [1,2,16,17,18,19,20]; // во вторник и четверг: разминка + растяжка
+const WED = { // среда: самый тяжёлый день, подходов меньше
+  4:'Облегчённый день: 6–8 раз на каждую ногу.',
+  6:'Облегчённый день: 8–10 раз.',
+  8:'Облегчённый день: 6–8 раз на каждую сторону.',
+  10:'Облегчённый день: 8–10 раз на каждую сторону.',
+  12:'Облегчённый день: 2 раза по 15–20 секунд.',
+  14:'Облегчённый день: 1–2 подхода по 8–10 раз.',
+  21:'Облегчённый день: 1–2 подхода по 8–10 раз.',
+  23:'Облегчённый день: 1–2 подхода по 10 раз.',
+  24:'Облегчённый день: 1–2 подхода по 8 раз.'
+};
+let showAll = false;
+function needFor(d){ return PLAN[d.getDay()]==='bike' ? 5 : Math.ceil(TOTAL*NEED); }
+function isTrained(log, d){ return (log[ymd(d)]||0) >= needFor(d); }
+function applyDay(){
+  const dow = new Date().getDay(), bike = PLAN[dow]==='bike' && !showAll;
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide', bike && !BIKE_SHOW.includes(+c.dataset.id)));
+  document.querySelectorAll('.group-title').forEach(t => {
+    let n = t.nextElementSibling, any = false;
+    while(n && !n.classList.contains('group-title')){ if(n.classList.contains('card') && !n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
+    t.classList.toggle('hide', !any);
+  });
+  document.querySelectorAll('.card').forEach(c => {
+    const row = [...c.querySelectorAll('.row')].find(r => r.textContent.trim().startsWith('Подходы'));
+    if(!row) return;
+    if(!row.dataset.orig) row.dataset.orig = row.innerHTML;
+    row.innerHTML = (dow===3 && WED[c.dataset.id]) ? '<b>Подходы:</b> '+WED[c.dataset.id] : row.dataset.orig;
+  });
+}
+function toggleAll(){ showAll = !showAll; applyDay(); updateProgress(); renderToday(); }
 function renderToday(){
   const el = document.getElementById('today'); if(!el) return;
   const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
-  const total = document.querySelectorAll('.card').length, need = Math.ceil(total*NEED);
-  const doneN = document.querySelectorAll('.card.done').length;
+  const need = needFor(now);
+  const doneN = document.querySelectorAll('.card.done:not(.hide)').length;
   let msg;
-  if(PLAN[dow]==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
-  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. После него — растяжка из блока «Растяжка и расслабление» (5–10 минут). Остальное можно не делать.';
+  if(dow===3) msg = '<b>Сегодня облегчённая тренировка.</b> Подходов меньше, чем в Пн и Пт: это самый нагруженный день.';
+  else if(PLAN[dow]==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
+  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. После него короткий комплекс: разминка и растяжка, около 10 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
   else msg = '<b>Сегодня отдых.</b> Можно сделать растяжку, если хочется.';
   // неделя Пн..Вс
   const mon = new Date(now); mon.setHours(0,0,0,0); mon.setDate(mon.getDate() - ((dow+6)%7));
@@ -613,7 +647,7 @@ function renderToday(){
     if(PLAN[d.getDay()]!=='train') continue;
     if(isTrained(log,d)) streak++; else if(i===0) continue; else break;
   }
-  const allN = Object.keys(log).filter(k => log[k] >= need).length;
+  const allN = Object.keys(log).filter(k => { const d=new Date(k+'T00:00:00'); return PLAN[d.getDay()]==='train' && log[k] >= needFor(d); }).length;
   el.innerHTML = msg + '<div class="week">'+cells+'</div>' +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего тренировок: '+allN+
     (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>';
@@ -630,6 +664,7 @@ load().forEach(id => {
   const card = document.querySelector('.card[data-id="'+id+'"]');
   if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
 });
+applyDay();
 updateProgress();
 renderToday();
 </script>
