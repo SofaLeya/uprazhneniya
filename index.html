@@ -218,6 +218,15 @@
   .demo-mus .str{background:#40e0d0}
   .demo-cap{margin-top:8px;font-size:13px;color:var(--text-dim);line-height:1.45}
   .demo-hint{margin-top:4px;font-size:11px;color:#6b6b78}
+  .today{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;margin:12px 0 4px;font-size:14px;line-height:1.45}
+  .today b{color:var(--accent)}
+  .week{display:flex;gap:6px;margin-top:10px}
+  .wd{flex:1;text-align:center;font-size:11px;color:var(--text-dim)}
+  .wd i{display:block;height:26px;margin-top:4px;border-radius:8px;border:1px solid var(--card-border);font-style:normal;font-size:13px;line-height:24px;color:var(--text-dim)}
+  .wd.plan i{border-color:var(--accent)}
+  .wd.ok i{background:rgba(110,231,168,.25);border-color:rgba(110,231,168,.6);color:#6ee7a8}
+  .wd.now span{color:var(--accent);font-weight:700}
+  .stat{margin-top:8px;font-size:12px;color:var(--text-dim)}
 </style>
 </head>
 <body>
@@ -229,6 +238,8 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-label" id="progressLabel">0 из 20 выполнено</div>
   </header>
+
+  <div class="today" id="today"></div>
 
   <details class="howto">
     <summary>Как пользоваться резинкой</summary>
@@ -398,8 +409,8 @@
       <details class="demo" data-ex="21"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
       <div class="row"><b>Как:</b> Встань лицом к стене на расстоянии шага, ладони на стене на уровне плеч, чуть шире плеч. Тело — прямая линия от пяток до макушки. Согни руки, мягко приблизив грудь к стене, затем вытолкни себя обратно.</div>
       <div class="row"><b>Дыхание:</b> Вдох — сгибаем руки, выдох — выпрямляем.</div>
-      <div class="row"><b>Подходы:</b> 2 подхода по 8–12 раз. Чем дальше ноги от стены, тем тяжелее.</div>
-      <div class="row important"><b>Важно:</b> Не прогибай поясницу и не выпячивай таз. Дыхание не задерживай. Когда станет легко — переходи на отжимания от устойчивого стула или стола.</div>
+      <div class="row"><b>Подходы:</b> 2 подхода по 8–12 раз. Чем дальше ноги от стены, тем тяжелее. Ноги стоят всей стопой, пятки на полу.</div>
+      <div class="row important"><b>Важно:</b> Не прогибай поясницу и не выпячивай таз. Дыхание не задерживай. Как усложнять, когда 2×12 даётся легко (обычно через 3–4 недели): от стены → от устойчивого стола или спинки дивана → от дивана → с колен на полу. Переходи на следующий шаг, только если нет боли в пояснице и запястьях.</div>
       <div class="tags"><span class="tag new">силовое · верх</span></div>
     </div>
   </div>
@@ -413,10 +424,10 @@
     </div>
     <div class="card-body">
       <details class="demo" data-ex="23"><summary>Как выполнять (анимация)</summary><div class="demo-box"></div></details>
-      <div class="row"><b>Как:</b> Встань прямо, резинка в руках на ширине плеч, руки вытянуты вперёд на уровне груди. Разведи руки в стороны, растягивая резинку и сводя лопатки. Медленно верни.</div>
+      <div class="row"><b>Как:</b> Встань прямо. Возьми резинку-петлю в обе кисти, по краю в каждую, ладони близко друг к другу (15–20 см). Руки вытянуты вперёд на уровне груди. Разведи руки в стороны, сводя лопатки, и медленно верни.</div>
       <div class="row"><b>Дыхание:</b> Выдох — разводим, вдох — возвращаем.</div>
       <div class="row"><b>Подходы:</b> 2 подхода по 10–12 раз.</div>
-      <div class="row important"><b>Важно:</b> Руки почти прямые, плечи вниз. Не прогибай поясницу — живот слегка подтянут. Если не хватает длины резинки, возьми её за более короткий участок.</div>
+      <div class="row important"><b>Важно:</b> Руки почти прямые, плечи вниз. Не прогибай поясницу — живот слегка подтянут. Тканевая резинка растягивается мало, это нормально: амплитуда небольшая. Если слишком туго или плечи ещё болят, делай то же движение без резинки, в конце на 2 секунды сведи лопатки.</div>
       <div class="tags"><span class="tag new">с резинкой · верх</span></div>
     </div>
   </div>
@@ -528,18 +539,25 @@
     </div>
   </div>
 
-  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
+  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16.<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
 </div>
 
 <script src="anim.js" defer></script>
 <script>
 const KEY = 'back-routine-done-v1';
-function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; } }
+const DKEY = 'back-routine-date-v1';
+const LKEY = 'back-routine-log-v1';
+const NEED = 0.6; // доля упражнений, после которой день считается тренировкой
+function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function lget(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null ? def : v; }catch(e){ return def; } }
+function lset(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function load(){ return lget(KEY, []); }
 function save(){
-  try{
-    const ids = [...document.querySelectorAll('.card.done')].map(c => c.dataset.id);
-    localStorage.setItem(KEY, JSON.stringify(ids));
-  }catch(e){}
+  const ids = [...document.querySelectorAll('.card.done')].map(c => c.dataset.id);
+  lset(KEY, ids);
+  const log = lget(LKEY, {});
+  log[ymd(new Date())] = ids.length;
+  lset(LKEY, log);
 }
 function toggleCard(headEl){
   const card = headEl.closest('.card');
@@ -547,6 +565,7 @@ function toggleCard(headEl){
   headEl.querySelector('.checkbox').classList.toggle('checked');
   updateProgress();
   save();
+  renderToday();
 }
 function resetAll(){
   document.querySelectorAll('.card.done').forEach(c => {
@@ -555,6 +574,7 @@ function resetAll(){
   });
   updateProgress();
   save();
+  renderToday();
 }
 function updateProgress(){
   const total = document.querySelectorAll('.card').length;
@@ -562,15 +582,56 @@ function updateProgress(){
   document.getElementById('progressFill').style.width = Math.round(done/total*100) + '%';
   document.getElementById('progressLabel').textContent = done + ' из ' + total + ' выполнено';
 }
+const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
+const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+function isTrained(log, d){ const total=document.querySelectorAll('.card').length; return (log[ymd(d)]||0) >= Math.ceil(total*NEED); }
+function renderToday(){
+  const el = document.getElementById('today'); if(!el) return;
+  const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
+  const total = document.querySelectorAll('.card').length, need = Math.ceil(total*NEED);
+  const doneN = document.querySelectorAll('.card.done').length;
+  let msg;
+  if(PLAN[dow]==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
+  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. После него — растяжка из блока «Растяжка и расслабление» (5–10 минут). Остальное можно не делать.';
+  else msg = '<b>Сегодня отдых.</b> Можно сделать растяжку, если хочется.';
+  // неделя Пн..Вс
+  const mon = new Date(now); mon.setHours(0,0,0,0); mon.setDate(mon.getDate() - ((dow+6)%7));
+  let cells='', weekN=0;
+  for(let i=0;i<7;i++){
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const wdow = d.getDay(), t = isTrained(log,d);
+    if(t && PLAN[wdow]==='train') weekN++;
+    const isNow = ymd(d)===ymd(now);
+    const cls = 'wd' + (t?' ok':'') + (PLAN[wdow]==='train'?' plan':'') + (isNow?' now':'');
+    const mark = t ? '✓' : (PLAN[wdow]==='bike' ? '🚴' : '');
+    cells += '<div class="'+cls+'"><span>'+DN[wdow]+'</span><i>'+mark+'</i></div>';
+  }
+  // серия: подряд выполненные дни тренировок (Пн/Ср/Пт), сегодняшний день без отметки не рвёт серию
+  let streak=0;
+  for(let i=0;i<120;i++){
+    const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
+    if(PLAN[d.getDay()]!=='train') continue;
+    if(isTrained(log,d)) streak++; else if(i===0) continue; else break;
+  }
+  const allN = Object.keys(log).filter(k => log[k] >= need).length;
+  el.innerHTML = msg + '<div class="week">'+cells+'</div>' +
+    '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего тренировок: '+allN+
+    (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>';
+}
 document.querySelectorAll('.card-head').forEach(h => {
   h.setAttribute('role','button'); h.setAttribute('tabindex','0');
   h.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleCard(h); } });
 });
+// новый день: отметки сбрасываются, история остаётся
+const today = ymd(new Date());
+if(lget(DKEY, '') !== today){ lset(KEY, []); }
+lset(DKEY, today);
 load().forEach(id => {
   const card = document.querySelector('.card[data-id="'+id+'"]');
   if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
 });
 updateProgress();
+renderToday();
 </script>
 </body>
 </html>

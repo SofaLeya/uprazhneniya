@@ -405,19 +405,19 @@ EX[15]={loop:true,period:5,pose:function(ph){
     cap:'Локти идут назад вдоль корпуса. Плечи не поднимаем, корпус не откидываем.'};
   EX[22].propsFront=true;
 })();
-/* 23. Разведение резинки (вид сзади) */
+/* 23. Разведение резинки (вид спереди) */
 (function(){
   function p(x,y){
-    return {back:true,front:true,hip:[0,1.66],t:[90,90],n:90,hw:.12,sw:.28,
+    return {front:true,hip:[0,1.66],t:[90,90],n:90,hw:.12,sw:.28,
       arms:[{ik:[x,y],b:1},{ik:[-x,y],b:-1}],
       legs:[{ik:[.2,.08],b:1,f:0},{ik:[-.2,.08],b:-1,f:180}]};
   }
   var a=p(.25,2.4), b=p(1.18,2.5);
   EX[23]={prof:[1.8,.6,1.8,.4],pose:function(q){return mix(a,b,q);},
-    props:function(g,k){ g.line([k.arms[0].e,k.arms[1].e],COL.band,.04); },
+    props:function(g,k){ g.line([k.arms[0].e,k.arms[1].e],COL.band,.045); g.circ(k.arms[0].e,.07,COL.band); g.circ(k.arms[1].e,.07,COL.band); },
     propsFront:true,
-    label:lab(['выдох — разводим руки (вид сзади)','вдох — возвращаем']),
-    cap:'Руки почти прямые, плечи опущены. Спину не прогибаем.'};
+    label:lab(['выдох — разводим руки, сводим лопатки','вдох — возвращаем']),
+    cap:'Резинка в двух кистях на уровне груди, руки почти прямые. Начни с узкого хвата, плечи опущены.'};
 })();
 /* 24. Ангел у стены */
 (function(){
