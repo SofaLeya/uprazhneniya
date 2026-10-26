@@ -227,6 +227,14 @@
   .wd.ok i{background:rgba(110,231,168,.25);border-color:rgba(110,231,168,.6);color:#6ee7a8}
   .wd.past{cursor:pointer}
   .week-lbl{font-size:11px;color:var(--text-dim);margin-top:10px}
+  details.hist{margin-top:10px}
+  details.hist>summary{cursor:pointer;color:var(--accent);font-size:13px;list-style:none}
+  details.hist>summary::-webkit-details-marker{display:none}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .bdg{flex:1 1 30%;min-width:96px;text-align:center;border:1px solid var(--card-border);border-radius:12px;padding:8px 4px;font-size:11px;color:var(--text-dim);opacity:.5;filter:grayscale(1)}
+  .bdg b{display:block;font-size:22px;font-weight:400;margin-bottom:2px}
+  .bdg.got{opacity:1;filter:none;border-color:rgba(255,200,87,.6);background:rgba(255,200,87,.08);color:var(--text)}
+  .cheer{margin-top:8px;font-size:13px;color:#6ee7a8}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
   .hide{display:none!important}
@@ -625,6 +633,7 @@ function markDay(k){
   if(isTrained(log,d)) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 7 : TOTAL;
   lset(LKEY, log); renderToday();
 }
+let histOpen = false;
 function renderToday(){
   const el = document.getElementById('today'); if(!el) return;
   const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
@@ -660,9 +669,35 @@ function renderToday(){
     if(isTrained(log,d)) streak++; else if(i===0) continue; else break;
   }
   const allN = Object.keys(log).filter(k => { const d=new Date(k+'T00:00:00'); return PLAN[d.getDay()]==='train' && log[k] >= needFor(d); }).length;
-  el.innerHTML = msg + cells +
-    '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего тренировок: '+allN+
-    (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div><div class="stat">Пропущенный день можно отметить вручную: нажми на него в прошлых днях.</div>';
+  // лучшая серия за всё время
+  let best=0, run=0;
+  const keys = Object.keys(log).sort();
+  if(keys.length){
+    const t0 = new Date(keys[0]+'T00:00:00'), t1 = new Date(now); t1.setHours(0,0,0,0);
+    for(let d=new Date(t0); d<=t1; d.setDate(d.getDate()+1)){
+      if(PLAN[d.getDay()]!=='train') continue;
+      if(isTrained(log,d)) { run++; if(run>best) best=run; }
+      else if(ymd(d)!==ymd(t1)) run=0;
+    }
+  }
+  const BD = [
+    {i:'🌱', n:'Первый шаг', v:allN, need:1, hint:'1 тренировка'},
+    {i:'🔥', n:'Неделя без пропусков', v:best, need:3, hint:'3 тренировки подряд'},
+    {i:'💪', n:'Две недели', v:best, need:6, hint:'6 подряд'},
+    {i:'🏅', n:'Месяц', v:best, need:12, hint:'12 подряд'},
+    {i:'⭐', n:'20 тренировок', v:allN, need:20, hint:'всего 20'},
+    {i:'🏆', n:'Три месяца', v:best, need:36, hint:'36 подряд'}
+  ];
+  const badges = '<div class="badges">'+BD.map(b => b.v>=b.need
+    ? '<div class="bdg got"><b>'+b.i+'</b>'+b.n+'</div>'
+    : '<div class="bdg"><b>'+b.i+'</b>'+b.n+'<br>ещё '+(b.need-b.v)+'</div>').join('')+'</div>';
+  const nextB = BD.find(b => b.v<b.need);
+  const cheer = isTrained(log,now) ? '<div class="cheer">Тренировка засчитана 🎉'+(streak>1?' Серия: '+streak+'.':'')+'</div>' : '';
+  el.innerHTML = msg + cheer +
+    '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего: '+allN+
+    (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>' +
+    '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary>История и награды'+(nextB?' · следующая: '+nextB.i+' '+nextB.n:'')+'</summary>'+cells+
+    '<div class="stat">Пропущенный день можно отметить вручную: нажми на него в прошлых днях.</div>'+badges+'</details>';
 }
 document.querySelectorAll('.card-head').forEach(h => {
   h.setAttribute('role','button'); h.setAttribute('tabindex','0');
