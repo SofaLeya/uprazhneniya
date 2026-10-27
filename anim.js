@@ -57,7 +57,7 @@ function Painter(ctx,cw,ch,v){
     ctx.strokeStyle=col; ctx.lineWidth=(w||W)*s; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.setLineDash(dash?dash.map(function(d){return d*s;}):[]); ctx.stroke(); ctx.setLineDash([]);
   };
-  this.circ=function(c,r,col){ ctx.beginPath(); ctx.arc(this.X(c[0]),this.Y(c[1]),r*s,0,7); ctx.fillStyle=col; ctx.fill(); };
+  this.circ=function(c,r,col,st){ ctx.beginPath(); ctx.arc(this.X(c[0]),this.Y(c[1]),r*s,0,7); ctx.fillStyle=col; ctx.fill(); if(st){ ctx.strokeStyle=st; ctx.lineWidth=.028*s; ctx.stroke(); } };
   this.text=function(t,x,y,col,size,align){ ctx.fillStyle=col; ctx.font='600 '+(size||13)+'px system-ui,sans-serif'; ctx.textAlign=align||'left'; ctx.fillText(t,x,y); };
   this.ctx=ctx; this.cw=cw; this.ch=ch;
 }
@@ -72,17 +72,63 @@ function drawLeg(g,l,far){
   g.line([l.j,l.e],far?C.legF:C.leg,.155);
   if(l.f) g.line([l.e,l.f],far?C.shoeF:C.shoe,.1);
 }
+function lineHead(g,k,na){
+  var h=k.head, c=g.ctx, p=k.p, dx=Math.cos(na), dy=Math.sin(na), s=g.s, HP='#ff7fbf', HD='#d9559a', W=A.tln;
+  function P(u,v,fx,fy){ return [h[0]+u*fx+v*dx, h[1]+u*fy+v*dy]; }
+  function ell(cx,cy,rx,ry,fill,st,lw){ c.save(); c.translate(g.X(cx),g.Y(cy)); c.rotate(Math.PI/2-na); c.beginPath(); c.ellipse(0,0,rx*s,ry*s,0,0,7); c.fillStyle=fill; c.fill(); if(st){ c.strokeStyle=st; c.lineWidth=lw*s; c.stroke(); } c.restore(); }
+  function ln(pts,col,w){ g.line(pts,col||W,w||.012); }
+  if(p.back){
+    g.circ(P(0,.2,0,0),.075,HP,W);
+    ell(h[0]+.01*dx,h[1]+.01*dy,.135,.175,HP,W,.034);
+    ln([P(0,.14,0,0),P(0,.0,0,0),P(0,-.12,0,0)],HD,.012);
+    return;
+  }
+  if(p.front){
+    var fx=-dy*0, fy=0; /* ось u: вправо по экрану */
+    var ux=-dy, uy=dx; /* перпендикуляр к оси головы */
+    g.circ([h[0]+.2*dx,h[1]+.2*dy],.075,HP,W);                       /* пучок */
+    ell(h[0]+.02*dx,h[1]+.02*dy,.14,.18,HP,W,.034);                   /* волосы */
+    ell(h[0]-.01*dx,h[1]-.025*dy,.113,.15,A.base,W,.026);             /* лицо */
+    function Q(u,v){ return [h[0]+u*ux+v*dx,h[1]+u*uy+v*dy]; }
+    /* волосы: пробор и пряди */
+    ln([Q(0,.17),Q(-.03,.1),Q(-.075,.07)],HD,.012); ln([Q(0,.17),Q(.03,.1),Q(.075,.07)],HD,.012);
+    ln([Q(-.06,.14),Q(-.1,.06),Q(-.11,-.02)],HD,.01); ln([Q(.06,.14),Q(.1,.06),Q(.11,-.02)],HD,.01);
+    /* брови, глаза, нос, губы */
+    [-1,1].forEach(function(sg){
+      ln([Q(sg*.025,.04),Q(sg*.055,.058),Q(sg*.092,.045)],W,.011);
+      ln([Q(sg*.03,.005),Q(sg*.055,.022),Q(sg*.085,.005),Q(sg*.055,-.01),Q(sg*.03,.005)],W,.009);
+      g.circ(Q(sg*.057,.006),.009,W);
+      ln([Q(sg*.13,-.01),Q(sg*.145,-.03),Q(sg*.125,-.06)],W,.01);  /* ухо */
+    });
+    ln([Q(-.014,-.04),Q(0,-.062),Q(.014,-.04)],W,.009);
+    ln([Q(-.035,-.095),Q(0,-.088),Q(.035,-.095)],W,.011); ln([Q(-.03,-.1),Q(0,-.115),Q(.03,-.1)],W,.009);
+    return;
+  }
+  /* профиль: u — вперёд (лицо), v — вверх по оси головы */
+  var bk=na+Math.PI/2, fc=na-Math.PI/2, fxx=Math.cos(fc), fyy=Math.sin(fc);
+  function R(u,v){ return [h[0]+u*fxx+v*dx,h[1]+u*fyy+v*dy]; }
+  g.circ([h[0]+.14*Math.cos(bk)+.1*dx,h[1]+.14*Math.sin(bk)+.1*dy],.075,HP,W);   /* пучок */
+  ell(h[0]+.045*Math.cos(bk)+.025*dx,h[1]+.045*Math.sin(bk)+.025*dy,.15,.18,HP,W,.034); /* волосы */
+  ell(h[0]+.03*fxx-.01*dx,h[1]+.03*fyy-.01*dy,.115,.15,A.base,W,.026);       /* лицо */
+  ln([R(.065,.075),R(.1,.082)],W,.011);                                      /* бровь */
+  ln([R(.065,.04),R(.095,.05),R(.115,.035)],W,.01); g.circ(R(.09,.042),.009,W); /* глаз */
+  ln([R(.135,.025),R(.16,-.02),R(.14,-.03)],W,.01);                           /* нос */
+  ln([R(.115,-.07),R(.14,-.075)],W,.011);                                     /* губы */
+  ln([R(-.02,.01),R(-.04,-.03),R(-.015,-.06)],W,.01);                         /* ухо */
+  ln([R(-.08,.1),R(-.02,.12),R(.06,.1)],HD,.01);                              /* прядь */
+}
 function drawHead(g,k){
   var p=k.p, h=k.head, na=(p.hd!=null?p.hd:p.n)*D;
+  if(A.tln){ lineHead(g,k,na); return; }
   if(p.back){
-    g.circ(h,.19,C.hair);
+    g.circ(h,.19,C.hair,A.tln);
     g.line([[h[0],h[1]-.1],[h[0]+.02,h[1]-.4]],C.hair,.1);
     return;
   }
   if(p.front){
     g.line([[h[0]+.15,h[1]],[h[0]+.27,h[1]-.28]],C.hair,.1);
-    g.circ(h,.195,C.hair);
-    g.circ([h[0],h[1]-.025],.155,C.skin);
+    g.circ(h,.195,C.hair,A.tln);
+    g.circ([h[0],h[1]-.025],.155,C.skin,A.tln);
     g.circ([h[0]-.055,h[1]-.01],.017,C.eye); g.circ([h[0]+.055,h[1]-.01],.017,C.eye);
     g.line([[h[0]-.035,h[1]-.07],[h[0],h[1]-.085],[h[0]+.035,h[1]-.07]],'#c26a6a',.012);
     return;
@@ -90,8 +136,8 @@ function drawHead(g,k){
   var bk=na+Math.PI/2, fc=na-Math.PI/2, bx=Math.cos(bk), by=Math.sin(bk);
   var tp=[h[0]+.15*bx,h[1]+.15*by], m1=[tp[0]+.2*bx,Math.max(.05,tp[1]+.2*by-.1)], m2=[m1[0]+.04*bx,Math.max(.05,m1[1]-.2)];
   g.line([tp,m1,m2],C.hairD,.09);
-  g.circ([h[0]+.05*bx,h[1]+.05*by],.185,C.hair);
-  g.circ([h[0]+.025*Math.cos(fc),h[1]+.025*Math.sin(fc)],.15,C.skin);
+  g.circ([h[0]+.05*bx,h[1]+.05*by],.185,C.hair,A.tln);
+  g.circ([h[0]+.025*Math.cos(fc),h[1]+.025*Math.sin(fc)],.15,C.skin,A.tln);
   g.circ([h[0]+.085*Math.cos(fc)+.03*Math.cos(na),h[1]+.085*Math.sin(fc)+.03*Math.sin(na)],.016,C.eye);
 }
 function drawSk(g,k,ex){
@@ -437,7 +483,7 @@ EX[15]={loop:true,period:5,pose:function(ph){
   }
   var a=p([.7,2.3],[.75,2.8]), b=p([.65,2.95],[.92,3.38]);
   EX[24]={prof:[2.4,.5,2.4,.4],pose:function(q){return mix(a,b,q);},
-    props:function(g){ g.line([[0,0],[0,3.6]],'#1a1a23',2.8); },
+    props:function(g){ if(A.tln) g.line([[0,0],[0,3.6]],COL.prop,.06); else g.line([[0,0],[0,3.6]],'#1a1a23',2.8); },
     label:lab(['выдох — руки вверх по стене','вдох — вниз']),
     cap:'Затылок, лопатки и поясница у стены. Руки скользят без боли в плечах.'};
 })();
@@ -449,7 +495,13 @@ for(var vi in VIEWS){ EX[vi].view=VIEWS[vi]; EX[vi].id=+vi; }
 
 
 /* ---------- плоская анатомическая модель ---------- */
-var A={base:'#d4d4e2',baseF:'#9d9db2',idle:'#d4d4e2',idleF:'#9d9db2',edge:'#d4d4e2',edgeF:'#9d9db2',work:[255,77,109],str:[64,224,208]};
+var A={base:'#d4d4e2',baseF:'#9d9db2',idle:'#d4d4e2',idleF:'#9d9db2',edge:'#d4d4e2',edgeF:'#9d9db2',work:[255,77,109],str:[64,224,208],ln:'#0c0c10',lnF:'#0c0c10',tln:null,lw:.02,legf:null,legFf:null,top:null};
+var C0=null;
+function setStyle(s){
+  if(!C0) C0=JSON.parse(JSON.stringify({C:C,A:{base:A.base,baseF:A.baseF,idle:A.idle,idleF:A.idleF,edge:A.edge,edgeF:A.edgeF}}));
+  if(s==='line'){ A.base=A.baseF=A.idle=A.idleF='#0b0b10'; A.edge='#f1f1f7'; A.edgeF='#8d8d9c'; A.ln='#f1f1f7'; A.lnF='#8d8d9c'; A.tln='#f1f1f7'; A.lw=.034; A.legf='#1b1626'; A.legFf='#14111c'; A.top='#2b1c3d'; C.skin=C.skinF='#0b0b10'; C.eye='#f1f1f7'; COL.band='#f1f1f7'; }
+  else { for(var k in C0.A) A[k]=C0.A[k]; A.ln=A.lnF='#0c0c10'; A.tln=null; A.lw=.02; A.legf=A.legFf=A.top=null; C.skin=C0.C.skin; C.skinF=C0.C.skinF; C.eye=C0.C.eye; COL.band='#ffb454'; }
+}
 function rgba(c,a){ return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'; }
 function wf(arr,t){ var n=arr.length-1, x=Math.min(1,Math.max(0,t))*n, i=Math.min(n-1,Math.floor(x)), f=x-i; return arr[i]*(1-f)+arr[i+1]*f; }
 function mkPath(pts){ var L=[0],i; for(i=1;i<pts.length;i++) L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1])); return {pts:pts,L:L,T:L[L.length-1]||1e-6}; }
@@ -476,7 +528,7 @@ function silh(g,part,fill,ln){
   for(i=0;i<=N;i++) pts.push(wp(part,i/N,1));
   pts.push(wp(part,1.05,0));
   for(i=N;i>=0;i--) pts.push(wp(part,i/N,-1));
-  blob(g,pts,fill,ln,.02);
+  blob(g,pts,fill,ln,A.lw);
 }
 function poly(g,part,P,mir,fill,stroke){
   var pts=P.map(function(q){ return wp(part,q[0],q[1]); }); blob(g,pts,fill,stroke);
@@ -524,20 +576,46 @@ var FB={
 };
 function sc(a,k){ return a.map(function(v){return v*k;}); }
 function parts(k,fb){
-  var o={legs:[],arms:[]}, H=k.hip,M=k.mid,S=k.sh, W=1.2;
+  var o={legs:[],arms:[]}, H=k.hip,M=k.mid,S=k.sh, W=A.tln?1.3:1.2, TW=A.tln?1.15:1.1;
   k.legs.forEach(function(l){
     o.legs.push({th:mkPart([l.root,l.j],sc([.105,.11,.085,.068],W),sc([.105,.12,.085,.065],W),1),sh:mkPart([l.j,l.e],sc([.068,.06,.046,.04],W),sc([.068,.085,.05,.04],W),1),l:l});
   });
   k.arms.forEach(function(l){
     o.arms.push({up:mkPart([l.root,l.j],sc([.058,.058,.048,.042],W),sc([.058,.058,.048,.042],W),1),fo:mkPart([l.j,l.e],sc([.045,.045,.035,.03],W),sc([.045,.045,.035,.03],W),1),l:l});
   });
-  o.torso=fb?mkPart([H,M,S],sc([.17,.155,.2,.24],1.1),sc([.17,.155,.2,.24],1.1),-1):mkPart([H,M,S],sc([.15,.14,.17,.13],1.1),sc([.16,.13,.15,.11],1.1),-1);
+  o.torso=A.tln?(fb?mkPart([H,M,S],sc([.21,.145,.17,.2],TW),sc([.21,.145,.17,.2],TW),-1):mkPart([H,M,S],sc([.16,.115,.2,.12],TW),sc([.17,.115,.14,.1],TW),-1)):(fb?mkPart([H,M,S],sc([.17,.155,.2,.24],TW),sc([.17,.155,.2,.24],TW),-1):mkPart([H,M,S],sc([.15,.14,.17,.13],TW),sc([.16,.13,.15,.11],TW),-1));
   return o;
 }
+function inl(g,pts,w){ g.line(pts,A.ln,w||.016); }
+function dLeg(g,L,far,fb){
+  if(!A.tln||far) return; var th=L.th, sh=L.sh;
+  inl(g,[wp(sh,.04,-.9),wp(sh,.04,.9)],.016);
+}
+function dArm(g,R,far,fb){
+  if(!A.tln||far) return; var e=R.l.e;
+  g.ctx.beginPath(); g.ctx.arc(g.X(e[0]),g.Y(e[1]),.05*g.s,0,7); g.ctx.fillStyle=A.base; g.ctx.fill(); g.ctx.strokeStyle=A.ln; g.ctx.lineWidth=.03*g.s; g.ctx.stroke();
+}
+function dress(g,T,fb,back){
+  if(!A.tln) return;
+  /* легинсы: пояс на бёдрах */
+  blob(g,[wp(T,-.06,1.04),wp(T,.14,1.06),wp(T,.14,-1.06),wp(T,-.06,-1.04)],A.legf,A.tln,.03);
+  /* спортивный топ */
+  var pts;
+  if(!fb) pts=[wp(T,.5,1.05),wp(T,.62,1.08),wp(T,.8,1.06),wp(T,.96,.7),wp(T,.98,-.5),wp(T,.9,-1.04),wp(T,.7,-1.05),wp(T,.5,-1.04)];
+  else if(!back) pts=[wp(T,.5,1.04),wp(T,.75,1.06),wp(T,.97,.9),wp(T,.9,.45),wp(T,.84,0),wp(T,.9,-.45),wp(T,.97,-.9),wp(T,.75,-1.06),wp(T,.5,-1.04)];
+  else pts=[wp(T,.5,1.04),wp(T,.75,1.06),wp(T,.97,.9),wp(T,.97,-.9),wp(T,.75,-1.06),wp(T,.5,-1.04)];
+  blob(g,pts,A.top,A.tln,.03);
+}
+function dTorso(g,T,fb,back){
+  if(!A.tln) return;
+  if(!fb) g.line([wp(T,.3,.45),wp(T,.3,.5)],A.ln,.02);
+  else if(!back) g.line([wp(T,.3,0),wp(T,.3,.0)],A.ln,.02);
+  else inl(g,[wp(T,.14,0),wp(T,.5,0)],.012);
+}
 function legDraw(g,L,idx,far,ex,pp,fb,glt){
-  var base=far?A.baseF:A.base;
-  silh(g,L.th,base,'#0c0c10'); silh(g,L.sh,base,'#0c0c10');
-  if(L.l.f){ var f=L.l.f, e=L.l.e; blob(g,[[e[0]-.03,e[1]-.045],[f[0],f[1]-.035],[f[0]+.03,f[1]],[f[0],f[1]+.035],[e[0]-.03,e[1]+.045]].map(function(q){return q;}),base); }
+  var base=A.tln?(far?A.legFf:A.legf):(far?A.baseF:A.base);
+  silh(g,L.th,base,far?A.lnF:A.ln); silh(g,L.sh,base,far?A.lnF:A.ln);
+  if(L.l.f){ var f=L.l.f, e=L.l.e; blob(g,[[e[0]-.03,e[1]-.045],[f[0],f[1]-.035],[f[0]+.03,f[1]],[f[0],f[1]+.035],[e[0]-.03,e[1]+.045]].map(function(q){return q;}),A.tln?A.base:base,A.tln,.025); }
   var back=!!ex.back_;
   if(!fb){
     mus(g,L.th,SHP.quad,false,mstate(ex,'quad',idx,far,pp));
@@ -555,10 +633,11 @@ function legDraw(g,L,idx,far,ex,pp,fb,glt){
       mus(g,L.sh,FB.calf,false,mstate(ex,'tibx',idx,far,pp));
     }
   }
+  dLeg(g,L,far,fb);
 }
 function armDraw(g,R,idx,far,ex,pp,fb){
   var base=far?A.baseF:A.base;
-  silh(g,R.fo,base,'#0c0c10'); silh(g,R.up,base,'#0c0c10');
+  silh(g,R.fo,base,far?A.lnF:A.ln); silh(g,R.up,base,far?A.lnF:A.ln);
   if(!fb){
     mus(g,R.fo,SHP.fa,false,mstate(ex,'fa',idx,far,pp));
     mus(g,R.up,SHP.bi,false,mstate(ex,'bi',idx,far,pp));
@@ -567,15 +646,18 @@ function armDraw(g,R,idx,far,ex,pp,fb){
     mus(g,R.fo,FB.arm,false,mstate(ex,'fa',idx,far,pp));
     mus(g,R.up,FB.arm,false,mstate(ex,ex.back_?'tri':'bi',idx,far,pp));
   }
+  dArm(g,R,far,fb);
 }
 function deltDraw(g,R,idx,far,ex,pp,fb){
   var m=mstate(ex,'delt',idx,far,pp);
   mus(g,R.up,fb?[[-.35,-1.3],[-.35,1.3],[.3,1.5],[.55,.7],[.55,-.7],[.3,-1.5]]:SHP.delt,false,m);
 }
 function torsoDraw(g,T,k,ex,pp,fb){
-  silh(g,T,A.base);
+  silh(g,T,A.base,A.tln);
+  dress(g,T,fb,!!k.p.back);
   var nk=k.neck, S=k.sh;
-  g.line([S,nk],A.base,.12);
+  if(A.tln) g.line([S,nk],A.tln,.14);
+  g.line([S,nk],A.base,.08);
   if(!fb){
     var m=mstate(ex,'abs',null,false,pp); mus(g,T,SHP.abs,false,m);
     
@@ -593,6 +675,7 @@ function torsoDraw(g,T,k,ex,pp,fb){
     mus(g,T,FB.trap,true,mstate(ex,'upback',null,false,pp));
     mus(g,T,FB.erector,true,mstate(ex,'erector',null,false,pp));
   }
+  dTorso(g,T,fb,!!k.p.back);
 }
 function drawAnat(g,k,ex,pp){
   var p=k.p, fb=!!(p.front||p.back); ex.back_=!!p.back;
@@ -668,9 +751,19 @@ function render(canvas,ex,t){
 }
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var GIFS={1:1,2:1,4:1,6:1,8:1,10:1,12:1,14:1,21:1,23:1,24:1,16:1,17:1,18:1,19:1,20:1};
 function mount(box,id){
   var ex=EX[id]; if(!ex||box.dataset.ready) return;
   box.dataset.ready='1';
+  if(GIFS[id]){
+    var im=document.createElement('img'); im.className='demo-gif'; im.alt='Анимация упражнения'; im.decoding='async';
+    im.onerror=function(){ im.remove(); box.dataset.ready=''; GIFS[id]=0; mount(box,id); if(box._start) box._start(); };
+    im.src='gif/ex-'+id+'.gif';
+    var M0=MUS[id], leg0=document.createElement('div'); leg0.className='demo-mus';
+    leg0.innerHTML=M0.work?'<span class="dot work"></span>Работают: '+M0.work:'<span class="dot str"></span>Растягиваются: '+M0.stretch;
+    var cap0=document.createElement('div'); cap0.className='demo-cap'; cap0.textContent=ex.cap||'';
+    box.appendChild(im); box.appendChild(leg0); box.appendChild(cap0); return;
+  }
   var cv=document.createElement('canvas'); cv.className='demo-canvas'; var vw=(ex.view||[4,2,0]); cv.style.aspectRatio=vw[0]+' / '+(vw[1]+.35); cv.setAttribute('role','img');
   cv.setAttribute('aria-label','Схематичная анимация упражнения');
   var cap=document.createElement('div'); cap.className='demo-cap'; cap.textContent=ex.cap||'';
@@ -705,5 +798,5 @@ function init(){
   });
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
-window.BackAnim={EX:EX,render:render,skeleton:skeleton};
+window.BackAnim={EX:EX,render:render,skeleton:skeleton,setStyle:setStyle};
 })();
