@@ -789,13 +789,12 @@ function mount(box,id){
   });
 }
 function init(){
-  document.querySelectorAll('details.demo').forEach(function(d){
+  document.addEventListener('toggle',function(e){
+    var d=e.target; if(!d.matches||!d.matches('details.demo')) return;
     var box=d.querySelector('.demo-box'), id=+d.dataset.ex;
-    d.addEventListener('toggle',function(){
-      if(d.open){ mount(box,id); if(box._start) box._start(); }
-      else if(box._stop) box._stop();
-    });
-  });
+    if(d.open){ mount(box,id); if(box._start) box._start(); }
+    else if(box._stop) box._stop();
+  },true);
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 window.BackAnim={EX:EX,render:render,skeleton:skeleton,setStyle:setStyle};

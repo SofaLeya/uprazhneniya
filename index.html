@@ -237,6 +237,13 @@
   .bdg.got{opacity:1;filter:none;border-color:rgba(255,200,87,.6);background:rgba(255,200,87,.08);color:var(--text)}
   .plan-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--card-border);font-size:13px;line-height:1.35}
   .plan-row b{flex:none;width:58px;color:var(--accent)}
+  details.plan-day>summary{list-style:none;cursor:pointer}
+  details.plan-day>summary::-webkit-details-marker{display:none}
+  .plan-row i{flex:none;margin-left:auto;font-style:normal;color:var(--text-dim);transition:transform .2s}
+  details.plan-day[open]>summary i{transform:rotate(90deg)}
+  .plan-body{padding:8px 0 4px}
+  .plan-note{font-size:12px;color:var(--text-dim);margin-bottom:8px}
+  .pcard{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px 16px;margin-bottom:10px}
   .cheer{margin-top:8px;font-size:13px;color:#6ee7a8}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
@@ -670,9 +677,41 @@ function markDay(k){
 }
 let histOpen = false, planOpen = false;
 const DESC = {1:'Тренировка: весь комплекс, около часа',3:'Облегчённая тренировка: подходов меньше, около часа',5:'Тренировка: весь комплекс, около часа',2:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',4:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',6:'Отдых. По желанию растяжка',0:'Отдых. По желанию растяжка'};
+let openDays = {};
+const REST_SHOW = [16,17,18,19,20];
+function dayCards(dow){
+  const all = [...document.querySelectorAll('.card')];
+  let list;
+  if(PLAN[dow]==='bike') list = all.filter(c => BIKE_SHOW.includes(+c.dataset.id));
+  else if(PLAN[dow]==='train') list = all.filter(c => !c.dataset.bike);
+  else list = all.filter(c => REST_SHOW.includes(+c.dataset.id));
+  let n = 0, h = '';
+  list.forEach(c => {
+    const k = c.cloneNode(true);
+    k.className = 'pcard'; k.removeAttribute('data-bike');
+    k.querySelectorAll('.checkbox').forEach(x => x.remove());
+    const hd = k.querySelector('.card-head'); if(hd){ hd.removeAttribute('onclick'); hd.style.cursor = 'default'; }
+    const dm = k.querySelector('details.demo'); if(dm){ dm.removeAttribute('open'); dm.querySelector('.demo-box').innerHTML = ''; }
+    const row = [...k.querySelectorAll('.row')].find(r => r.textContent.trim().startsWith('Подходы'));
+    if(row && row.dataset.orig){ row.innerHTML = row.dataset.orig; }
+    if(row && dow===3 && WED[c.dataset.id]) row.innerHTML = '<b>Подходы:</b> '+WED[c.dataset.id];
+    const num = k.querySelector('.num'); if(num && !isNaN(+num.textContent)) num.textContent = ++n;
+    h += k.outerHTML;
+  });
+  return h;
+}
+function toggleDay(el){
+  if(el.open){ openDays[el.dataset.k] = 1; if(!el.querySelector('.plan-body')){ const d=new Date(el.dataset.k+'T00:00:00'); el.insertAdjacentHTML('beforeend','<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d.getDay())+'</div>'); } }
+  else delete openDays[el.dataset.k];
+}
 function planHtml(now){
   let r='';
-  for(let i=1;i<=7;i++){ const d=new Date(now); d.setDate(d.getDate()+i); r += '<div class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span></div>'; }
+  for(let i=1;i<=7;i++){
+    const d=new Date(now); d.setDate(d.getDate()+i); const k=ymd(d);
+    const op = openDays[k];
+    r += '<details class="plan-day" data-k="'+k+'"'+(op?' open':'')+' ontoggle="toggleDay(this)"><summary class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span><i>›</i></summary>'+
+      (op ? '<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d.getDay())+'</div>' : '')+'</details>';
+  }
   return '<details class="hist"'+(planOpen?' open':'')+' ontoggle="planOpen=this.open"><summary>Что ждёт в ближайшие дни</summary>'+r+'</details>';
 }
 function renderToday(){
