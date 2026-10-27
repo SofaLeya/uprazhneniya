@@ -676,7 +676,7 @@ function markDay(k){
   lset(LKEY, log); renderToday();
 }
 let histOpen = false, planOpen = false;
-const DESC = {1:'Тренировка: весь комплекс, около часа',3:'Облегчённая тренировка: подходов меньше, около часа',5:'Тренировка: весь комплекс, около часа',2:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',4:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',6:'Отдых. По желанию растяжка',0:'Отдых. По желанию растяжка'};
+const DESC = {1:'Тренировка: весь комплекс, около часа',3:'Облегчённая тренировка: подходов меньше, около часа',5:'Тренировка: весь комплекс, около часа',2:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',4:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',6:'Отдых',0:'Отдых'};
 let openDays = {};
 const REST_SHOW = [16,17,18,19,20];
 function dayCards(dow){
@@ -709,6 +709,7 @@ function planHtml(now){
   for(let i=1;i<=7;i++){
     const d=new Date(now); d.setDate(d.getDate()+i); const k=ymd(d);
     const op = openDays[k];
+    if(!PLAN[d.getDay()]){ r += '<div class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span></div>'; continue; }
     r += '<details class="plan-day" data-k="'+k+'"'+(op?' open':'')+' ontoggle="toggleDay(this)"><summary class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span><i>›</i></summary>'+
       (op ? '<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d.getDay())+'</div>' : '')+'</details>';
   }
