@@ -269,6 +269,24 @@
   <div class="toolbar"><button type="button" onclick="resetAll()">Сбросить отметки</button></div>
 
 
+  <div class="group-title">Кардио</div>
+
+  <div class="card" data-id="30" data-bike="1">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">🚴</div>
+        <h3 class="card-title">Велотренажёр</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Сколько:</b> 30–40 минут в комфортном темпе, когда можно разговаривать.</div>
+      <div class="row"><b>Дыхание:</b> Ровное, без задержки и натуживания.</div>
+      <div class="row important"><b>Важно:</b> Спина прямая, не заваливайся вперёд на руль. Руль повыше, если тянет поясницу. Каждые 10 минут приподнимайся на педалях на 20–30 секунд, чтобы не было долгого давления на седло. Боль в пояснице или онемение: сбавь темп или остановись.</div>
+      <div class="tags"><span class="tag new">кардио</span></div>
+    </div>
+  </div>
+
   <div class="group-title">Разминка и дыхание</div>
 
   <div class="card" data-id="1">
@@ -553,7 +571,7 @@
     </div>
   </div>
 
-  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16 (по вт и чт: 4 из 5).<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
+  <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16 (по вт и чт: 5 из 6, включая велотренажёр).<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
 </div>
 
 <script src="anim.js" defer></script>
@@ -599,8 +617,8 @@ function updateProgress(){
 }
 const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
 const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-const TOTAL = document.querySelectorAll('.card').length;
-const BIKE_SHOW = [1,2,16,17,19]; // во вторник и четверг: разминка + растяжка
+const TOTAL = document.querySelectorAll('.card:not([data-bike])').length;
+const BIKE_SHOW = [30,1,2,16,17,19]; // во вторник и четверг: разминка + растяжка
 const WED = { // среда: самый тяжёлый день, подходов меньше
   4:'Облегчённый день: 6–8 раз на каждую ногу.',
   6:'Облегчённый день: 8–10 раз.',
@@ -613,7 +631,7 @@ const WED = { // среда: самый тяжёлый день, подходо�
   24:'Облегчённый день: 1–2 подхода по 8 раз.'
 };
 let showAll = false;
-function needFor(d){ return PLAN[d.getDay()]==='bike' ? 4 : Math.ceil(TOTAL*NEED); }
+function needFor(d){ return PLAN[d.getDay()]==='bike' ? 5 : Math.ceil(TOTAL*NEED); }
 function isTrained(log, d){ return (log[ymd(d)]||0) >= needFor(d); }
 function sickStart(){ return lget(SKEY, null); }
 function isPaused(log, d){ const k=ymd(d), s=sickStart(); return log[k]===-1 || (s && k>=s && !isTrained(log,d)); }
@@ -629,7 +647,8 @@ function setSick(on){
 }
 function applyDay(){
   const dow = new Date().getDay(), bike = PLAN[dow]==='bike' && !showAll;
-  document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide', bike && !BIKE_SHOW.includes(+c.dataset.id)));
+  const isBikeDay = PLAN[dow]==='bike';
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide', c.dataset.bike ? !isBikeDay : (bike && !BIKE_SHOW.includes(+c.dataset.id))));
   document.querySelectorAll('.group-title').forEach(t => {
     let n = t.nextElementSibling, any = false;
     while(n && !n.classList.contains('group-title')){ if(n.classList.contains('card') && !n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
@@ -645,7 +664,7 @@ function applyDay(){
 function toggleAll(){ showAll = !showAll; applyDay(); updateProgress(); renderToday(); }
 function markDay(k){
   const log = lget(LKEY, {}), d = new Date(k+'T00:00:00');
-  if(isTrained(log,d)) log[k] = -1; else if(log[k]===-1) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 5 : TOTAL;
+  if(isTrained(log,d)) log[k] = -1; else if(log[k]===-1) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 6 : TOTAL;
   lset(LKEY, log); renderToday();
 }
 let histOpen = false, planOpen = false;
@@ -663,7 +682,7 @@ function renderToday(){
   let msg;
   if(dow===3) msg = '<b>Сегодня облегчённая тренировка.</b> Подходов меньше, чем в Пн и Пт: это самый нагруженный день.';
   else if(PLAN[dow]==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
-  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. После него короткий комплекс: разминка и 3 растяжки, около 7 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
+  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. Отметь его в списке. После него короткий комплекс: разминка и 3 растяжки, около 7 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
   else msg = '<b>Сегодня отдых.</b> Можно сделать растяжку, если хочется.';
   const sick = !!sickStart();
   if(sick) msg = '<b>Пауза: ты болеешь.</b> Отдыхай, серия сохранена, пропуски не считаются. При температуре и слабости не тренируйся. Когда станет лучше, нажми «Я выздоровела».';
