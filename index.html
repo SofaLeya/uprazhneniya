@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0d">
+<meta name="theme-color" content="#05080a">
 <title>Комплекс для спины</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -14,11 +14,11 @@
 
 <style>
   :root{
-    --bg: #0a0a0d;
-    --card: #15151a;
-    --card-border: #2a2a33;
-    --accent: #b98cff;
-    --accent-soft: rgba(185,140,255,0.12);
+    --bg: #05080a;
+    --card: #0d1417;
+    --card-border: #1f2e31;
+    --accent: #30d5c8;
+    --accent-soft: rgba(48,213,200,0.12);
     --text: #f2f2f5;
     --text-dim: #a3a3ad;
     --done: #6ee7a8;
@@ -26,7 +26,7 @@
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background: radial-gradient(1200px 800px at 20% -10%, #1c1626 0%, var(--bg) 55%);
+    background: radial-gradient(1200px 800px at 20% -10%, #0a2422 0%, var(--bg) 55%);
     color:var(--text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     padding: 32px 16px 80px;
@@ -45,7 +45,7 @@
   }
   .progress-bar{
     height: 6px;
-    background: #1e1e26;
+    background: #16222a;
     border-radius: 10px;
     margin-top: 18px;
     overflow: hidden;
@@ -53,7 +53,7 @@
   .progress-fill{
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg,#b98cff,#7c5cff);
+    background: linear-gradient(90deg,#30d5c8,#14a39a);
     transition: width .3s ease;
   }
   .progress-label{
@@ -166,14 +166,14 @@
   .tag{
     font-size: 12px;
     color: var(--text-dim);
-    background: #1e1e26;
+    background: #16222a;
     border: 1px solid var(--card-border);
     padding: 4px 10px;
     border-radius: 999px;
   }
   .tag.new{
     color: var(--accent);
-    border-color: rgba(185,140,255,0.4);
+    border-color: rgba(48,213,200,0.4);
     background: var(--accent-soft);
   }
 
@@ -212,7 +212,7 @@
   details.demo[open] summary::before{transform:rotate(90deg)}
   .demo-box{padding:0 10px 10px}
   .demo-gif{display:block;width:100%;height:auto;border-radius:8px;background:#000}
-  .demo-canvas{display:block;width:100%;height:auto;border-radius:8px;background:#0e0e13;cursor:pointer}
+  .demo-canvas{display:block;width:100%;height:auto;border-radius:8px;background:#060d0e;cursor:pointer}
   .demo-phase{margin-top:8px;font-size:15px;font-weight:700;color:var(--accent)}
   .demo-mus{margin-top:8px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px}
   .demo-mus .dot{width:12px;height:12px;border-radius:50%;flex:none}

@@ -3,7 +3,7 @@
 'use strict';
 var D = Math.PI/180;
 var T1=.45, T2=.45, NECK=.12, HR=.15, UA=.5, FA=.45, TH=.8, SH=.78, FT=.22;
-var COL = {body:'#b98cff', far:'#6c58a3', floor:'#3a3a46', prop:'#6b6b78', band:'#ffb454', ink:'#a3a3ad'};
+var COL = {body:'#30d5c8', far:'#1c7f78', floor:'#3a3a46', prop:'#6b6b78', band:'#ffb454', ink:'#a3a3ad'};
 
 /* ---------- математика ---------- */
 function lerp(a,b,p){ return a+(b-a)*p; }
@@ -61,7 +61,7 @@ function Painter(ctx,cw,ch,v){
   this.text=function(t,x,y,col,size,align){ ctx.fillStyle=col; ctx.font='600 '+(size||13)+'px system-ui,sans-serif'; ctx.textAlign=align||'left'; ctx.fillText(t,x,y); };
   this.ctx=ctx; this.cw=cw; this.ch=ch;
 }
-var C={skin:'#f2c6a0',skinF:'#c49a7c',top:'#b98cff',leg:'#4f43a0',legF:'#3a3175',shoe:'#f2f2f5',shoeF:'#9a9aa6',hair:'#ff7fbf',hairD:'#d9559a',eye:'#2a2030'};
+var C={skin:'#f2c6a0',skinF:'#c49a7c',top:'#30d5c8',leg:'#1f6f69',legF:'#16504c',shoe:'#f2f2f5',shoeF:'#9a9aa6',hair:'#ff7fbf',hairD:'#d9559a',eye:'#2a2030'};
 function drawArm(g,l,far){
   g.line([l.root,l.j],far?COL.far:C.top,.13);
   g.line([l.j,l.e],far?C.skinF:C.skin,.095);
