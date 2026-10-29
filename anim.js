@@ -762,6 +762,7 @@ var PHOTO={
   16:['ИСХОДНОЕ · предплечья на косяках, локти на уровне плеч','ТЯНЕМ · шаг вперёд, грудь вперёд, плечи вниз'],
   17:['ИСХОДНОЕ · рука за головой, локоть вверх','ТЯНЕМ · второй рукой потяните локоть назад и вниз'],
   18:['ИСХОДНОЕ · руки далеко друг от друга, полотенце свободно','ТЯНЕМ · нижняя рука поднимается по полотенцу, руки ближе'],
+  30:['Спина прямая, руки на бёдрах, ровное дыхание'],
   14:['ИСХОДНОЕ · корпус опущен, руки на груди','ВЫДОХ · поднимите корпус до прямой линии'],
   23:['ИСХОДНОЕ · руки прямо перед собой, лента натянута','ВЫДОХ · разведите руки, сведите лопатки'],
   10:['ИСХОДНОЕ · колени и стопы вместе, резинка выше колен','ВЫДОХ · поднимите верхнее колено, таз не заваливается'],
@@ -777,14 +778,14 @@ function mountPhoto(box,id){
   function show(){ im.src='gif/ph-'+id+'-'+(k+1)+'.webp'; lab.textContent=cp[k]; }
   im.onerror=function(){ box.innerHTML=''; box.dataset.ready=''; PHOTO[id]=0; mount(box,id); if(box._start) box._start(); };
   var M0=MUS[id], leg0=document.createElement('div'); leg0.className='demo-mus';
-  leg0.innerHTML=M0.work?'<span class="dot work"></span>Работают: '+M0.work:'<span class="dot str"></span>Растягиваются: '+M0.stretch;
-  box.appendChild(im); box.appendChild(lab); box.appendChild(leg0); show();
+  if(M0) leg0.innerHTML=M0.work?'<span class="dot work"></span>Работают: '+M0.work:'<span class="dot str"></span>Растягиваются: '+M0.stretch;
+  box.appendChild(im); box.appendChild(lab); if(M0) box.appendChild(leg0); show();
   box._start=function(){ if(tm||reduce||cp.length<2) return; tm=setInterval(function(){ k=1-k; show(); },1800); };
   box._stop=function(){ clearInterval(tm); tm=0; };
   if(cp.length>1) im.addEventListener('click',function(){ if(tm) box._stop(); else box._start(); });
 }
 function mount(box,id){
-  var ex=EX[id]; if(!ex||box.dataset.ready) return;
+  var ex=EX[id]; if((!ex&&!PHOTO[id])||box.dataset.ready) return;
   box.dataset.ready='1';
   if(PHOTO[id]){ mountPhoto(box,id); return; }
   if(GIFS[id]){
