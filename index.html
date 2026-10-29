@@ -588,6 +588,8 @@
       <button type="button" onclick="document.getElementById('bk-file').click()">Восстановить из файла</button>
       <input type="file" id="bk-file" accept=".json,.txt,application/json,text/plain" hidden>
     </div>
+    <h4 style="margin:14px 0 6px;color:var(--accent)">Яндекс Диск</h4>
+    <div class="ydsync-box"></div>
     <h4 style="margin:14px 0 6px;color:var(--accent)">Копии в Телеграм</h4>
     <div class="tgbk-box"></div>
   </details>
@@ -597,6 +599,7 @@
 
 <script src="anim.js" defer></script>
 <script src="tgbk.js"></script>
+<script src="ydsync.js"></script>
 <script>
 const KEY = 'back-routine-done-v1';
 const DKEY = 'back-routine-date-v1';
@@ -833,6 +836,7 @@ document.getElementById('bk-file').addEventListener('change',function(e){
     }catch(err){ st.textContent='Этот файл не подходит. Выбери файл копии упражнений (uprazhneniya-….json).'; } e.target.value=''; };
   r.readAsText(f);
 });
+try{ if(window.YDS) YDS.init({app:'uprazhneniya',title:'Упражнения',cid:'03d1167980654fff95c2a2421ea342d7',redir:'https://sofaleya.github.io/uprazhneniya/',prefix:'back-routine-',accent:'#30d5c8',accentText:'#05080a'}); }catch(e){}
 try{ if(window.TGBK) TGBK.init({app:'uprazhneniya',title:'Упражнения',accent:'#30d5c8',accentText:'#05080a',file:function(d){return 'uprazhneniya-'+d+'.json'},data:bkJson}); }catch(e){}
 </script>
 <script>if('serviceWorker' in navigator && location.protocol.startsWith('http')) addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });</script>
