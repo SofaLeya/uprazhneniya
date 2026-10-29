@@ -581,10 +581,22 @@
     </div>
   </div>
 
+  <details class="howto" id="bk"><summary>Резервная копия</summary>
+    <p style="margin:10px 0 8px;color:var(--text-dim)" id="bk-status">Отметки и журнал тренировок хранятся только в этом браузере. Скачай копию или подключи Телеграм — тогда копия будет приходить сама.</p>
+    <div class="toolbar" style="text-align:left;display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" id="bk-save">Скачать копию</button>
+      <button type="button" onclick="document.getElementById('bk-file').click()">Восстановить из файла</button>
+      <input type="file" id="bk-file" accept=".json,.txt,application/json,text/plain" hidden>
+    </div>
+    <h4 style="margin:14px 0 6px;color:var(--accent)">Копии в Телеграм</h4>
+    <div class="tgbk-box"></div>
+  </details>
+
   <footer>Нажимай на карточку, чтобы отметить упражнение выполненным ✓ Отметки сбрасываются каждый день, тренировкой считается день, где выполнено 10 из 16 (по вт и чт: 5 из 6, включая велотренажёр).<br>Силовые упражнения — без боли и без задержки дыхания. Если что-то отдаёт в поясницу, пропусти шаг.<br>Резинку бери самую лёгкую; если появляется боль — пропусти упражнение.</footer>
 </div>
 
 <script src="anim.js" defer></script>
+<script src="tgbk.js"></script>
 <script>
 const KEY = 'back-routine-done-v1';
 const DKEY = 'back-routine-date-v1';
@@ -804,6 +816,24 @@ load().forEach(id => {
 applyDay();
 updateProgress();
 renderToday();
+
+// резервная копия: все ключи back-routine-*
+function bkCollect(){ const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith('back-routine-')) data[k]=localStorage.getItem(k); } }catch(e){} return data; }
+function bkJson(){ const data=bkCollect(); return Object.keys(data).length ? JSON.stringify({app:'uprazhneniya',v:1,data},null,1) : ''; }
+document.getElementById('bk-save').addEventListener('click',function(){
+  const js=bkJson()||JSON.stringify({app:'uprazhneniya',v:1,data:{}}), a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([js],{type:'application/json'})); a.download='uprazhneniya-'+ymd(new Date())+'.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+});
+document.getElementById('bk-file').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader(), st=document.getElementById('bk-status');
+  r.onload=function(){ try{ const j=JSON.parse(r.result); if(j.app!=='uprazhneniya'||!j.data) throw 0;
+      Object.keys(j.data).forEach(function(k){ if(k.startsWith('back-routine-')) localStorage.setItem(k,j.data[k]); });
+      st.textContent='Готово, восстановлено. Обновляю страницу…'; setTimeout(function(){location.reload()},700);
+    }catch(err){ st.textContent='Этот файл не подходит. Выбери файл копии упражнений (uprazhneniya-….json).'; } e.target.value=''; };
+  r.readAsText(f);
+});
+try{ if(window.TGBK) TGBK.init({app:'uprazhneniya',title:'Упражнения',accent:'#30d5c8',accentText:'#05080a',file:function(d){return 'uprazhneniya-'+d+'.json'},data:bkJson}); }catch(e){}
 </script>
 <script>if('serviceWorker' in navigator && location.protocol.startsWith('http')) addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });</script>
 </body>
