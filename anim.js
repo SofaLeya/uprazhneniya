@@ -755,22 +755,27 @@ var GIFS={1:1,2:1,4:1,6:1,8:1,10:1,12:1,14:1,21:1,23:1,24:1,16:1,17:1,18:1,19:1,
 var PHOTO={
   1:['ВДОХ · прогнитесь, взгляд вверх','ВЫДОХ · округлите спину, подбородок к груди'],
   2:['ВДОХ · живот поднимается','ВЫДОХ · живот опускается'],
+  4:['ИСХОДНОЕ · колени согнуты «столом»','ВЫДОХ · одну ногу вперёд и вниз, поясница прижата'],
   6:['ИСХОДНОЕ · колени согнуты, резинка выше колен','ВЫДОХ · поднимите таз до прямой линии'],
   8:['ИСХОДНОЕ · на четвереньках','ВЫДОХ · рука вперёд, нога назад, таз ровно'],
-  4:['ИСХОДНОЕ · колени согнуты «столом»','ВЫДОХ · одну ногу вперёд и вниз, поясница прижата']};
+  10:['ИСХОДНОЕ · колени и стопы вместе, резинка выше колен','ВЫДОХ · поднимите верхнее колено, таз не заваливается'],
+  12:['ИСХОДНОЕ · стоя спиной к стене','ДЫШИМ РОВНО · сядьте до 90° и держите'],
+  24:['ИСХОДНОЕ · локти согнуты, руки у стены','ВЫДОХ · руки вверх по стене'],
+  19:['ИСХОДНОЕ · лёжа, лодыжка на колене','ТЯНЕМ · подтяните бедро к груди'],
+  20:['ЛЕЖИМ · колени и таз под 90°, дыхание ровное']};
 function mountPhoto(box,id){
   var cp=PHOTO[id], im=document.createElement('img'); im.className='demo-gif'; im.alt='Положение в упражнении';
   var lab=document.createElement('div'); lab.className='demo-phase';
   var k=0, tm=0;
-  [1,2].forEach(function(n){ var pre=new Image(); pre.src='gif/ph-'+id+'-'+n+'.webp'; });
+  [1,2].slice(0,cp.length).forEach(function(n){ var pre=new Image(); pre.src='gif/ph-'+id+'-'+n+'.webp'; });
   function show(){ im.src='gif/ph-'+id+'-'+(k+1)+'.webp'; lab.textContent=cp[k]; }
   im.onerror=function(){ box.innerHTML=''; box.dataset.ready=''; PHOTO[id]=0; mount(box,id); if(box._start) box._start(); };
   var M0=MUS[id], leg0=document.createElement('div'); leg0.className='demo-mus';
   leg0.innerHTML=M0.work?'<span class="dot work"></span>Работают: '+M0.work:'<span class="dot str"></span>Растягиваются: '+M0.stretch;
   box.appendChild(im); box.appendChild(lab); box.appendChild(leg0); show();
-  box._start=function(){ if(tm||reduce) return; tm=setInterval(function(){ k=1-k; show(); },1800); };
+  box._start=function(){ if(tm||reduce||cp.length<2) return; tm=setInterval(function(){ k=1-k; show(); },1800); };
   box._stop=function(){ clearInterval(tm); tm=0; };
-  im.addEventListener('click',function(){ if(tm) box._stop(); else box._start(); });
+  if(cp.length>1) im.addEventListener('click',function(){ if(tm) box._stop(); else box._start(); });
 }
 function mount(box,id){
   var ex=EX[id]; if(!ex||box.dataset.ready) return;
