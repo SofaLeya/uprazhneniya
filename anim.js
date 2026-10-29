@@ -751,7 +751,7 @@ function render(canvas,ex,t){
 }
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var GIFS={1:1,2:1,4:1,6:1,8:1,10:1,12:1,14:1,21:1,23:1,24:1,16:1,17:1,18:1,19:1,20:1};
+var GIFS={};
 var PHOTO={
   1:['ВДОХ · прогнитесь, взгляд вверх','ВЫДОХ · округлите спину, подбородок к груди'],
   2:['ВДОХ · живот поднимается','ВЫДОХ · живот опускается'],
