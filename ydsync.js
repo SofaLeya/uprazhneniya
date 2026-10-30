@@ -105,7 +105,9 @@
         '<button type="button" data-yds="out" style="'+LNK+'">отключить</button></div>';
     }
     return s+'</div>'}
-  function paint(){document.querySelectorAll('.ydsync-box').forEach(function(b){b.innerHTML=panel()})}
+  function label(){if(!on())return '';return st==='wait'?'синхронизация…':st==='err'?'нет связи с Диском':'Диск ✓'}
+  function paint(){document.querySelectorAll('.ydsync-box').forEach(function(b){b.innerHTML=panel()});
+    document.querySelectorAll('.ydsync-badge').forEach(function(b){var t=label();b.textContent=t;b.hidden=!t;b.title=st==='err'?msg:''})}
   function note(t){var d=document.createElement('div');d.textContent=t;d.setAttribute('role','status');
     d.style.cssText='position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:999;padding:12px 16px;border-radius:12px;background:#222;color:#fff;font:14px/1.4 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:520px;margin:0 auto';
     document.body.appendChild(d);setTimeout(function(){d.remove()},5000)}
@@ -120,7 +122,9 @@
       try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
       if(q.get('access_token')){set({tok:q.get('access_token'),exp:Date.now()+(+q.get('expires_in')||31536000)*1000,dev:get().dev||uid()});C.justIn=true}
       else msg='Яндекс не дал доступ'+(q.get('error')==='access_denied'?': вход отменён':' ('+(q.get('error_description')||q.get('error'))+')')}
-    document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-yds]');if(!b)return;e.preventDefault();
+    document.addEventListener('click',function(e){var g=e.target.closest&&e.target.closest('.ydsync-badge');
+      if(g){var bx=document.querySelector('.ydsync-box');if(bx){for(var el=bx;el;el=el.parentElement)if(el.tagName==='DETAILS')el.open=true;bx.scrollIntoView({behavior:'smooth',block:'center'})}return}
+      var b=e.target.closest&&e.target.closest('[data-yds]');if(!b)return;e.preventDefault();
       var a=b.getAttribute('data-yds');if(a==='in')login();else if(a==='now')sync();else if(a==='out')logout()});
     document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&on())setTimeout(sync,800)});
     window.addEventListener('storage',function(e){if(e.key===KEY){if(on()&&st==='off')sync();else paint()}});
