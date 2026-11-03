@@ -648,6 +648,7 @@ const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
 const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 const TOTAL = document.querySelectorAll('.card:not([data-bike])').length;
 const BIKE_SHOW = [30,1,2,16,17,19]; // во вторник и четверг: разминка + растяжка
+const ORDER = [...document.querySelectorAll('.card')].map(c => +c.dataset.id); // исходный порядок карточек
 const WED = { // среда: самый тяжёлый день, подходов меньше
   4:'Облегчённый день: 6–8 раз на каждую ногу.',
   6:'Облегчённый день: 8–10 раз.',
@@ -677,6 +678,8 @@ function setSick(on){
 function applyDay(){
   const dow = new Date().getDay(), bike = PLAN[dow]==='bike' && !showAll;
   const isBikeDay = PLAN[dow]==='bike';
+  const c19=document.querySelector('.card[data-id="19"]'), c16=document.querySelector('.card[data-id="16"]'), c20=document.querySelector('.card[data-id="20"]');
+  if(c19&&c16&&c20){ if(isBikeDay) c16.before(c19); else c20.before(c19); } // вт/чт: грушевидная сразу после дыхания
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide', c.dataset.bike ? !isBikeDay : (bike && !BIKE_SHOW.includes(+c.dataset.id))));
   document.querySelectorAll('.group-title').forEach(t => {
     let n = t.nextElementSibling, any = false;
@@ -701,9 +704,13 @@ const DESC = {1:'Тренировка: весь комплекс, около ч�
 let openDays = {};
 const REST_SHOW = [16,17,18,19,20];
 function dayCards(dow){
-  const all = [...document.querySelectorAll('.card')];
+  const all = [...document.querySelectorAll('.card')].sort((a,b) => ORDER.indexOf(+a.dataset.id) - ORDER.indexOf(+b.dataset.id));
   let list;
-  if(PLAN[dow]==='bike') list = all.filter(c => BIKE_SHOW.includes(+c.dataset.id));
+  if(PLAN[dow]==='bike'){
+    list = all.filter(c => BIKE_SHOW.includes(+c.dataset.id));
+    const i19 = list.findIndex(c => c.dataset.id==='19'), i16 = list.findIndex(c => c.dataset.id==='16');
+    if(i19>-1 && i16>-1){ const x = list.splice(i19,1)[0]; list.splice(i16,0,x); }
+  }
   else if(PLAN[dow]==='train') list = all.filter(c => !c.dataset.bike);
   else list = all.filter(c => REST_SHOW.includes(+c.dataset.id));
   let n = 0, h = '';
