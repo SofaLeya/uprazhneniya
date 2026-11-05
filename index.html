@@ -791,8 +791,8 @@ function apkIs(){
   try{
     if(typeof AndroidApp!=='undefined') return true;
     // старый apk из PWABuilder открывает сайт в Chrome без моста; его выдаёт referrer
-    if((document.referrer||'').indexOf('android-app://io.github.sofaleya.uprazhneniya')===0) sessionStorage.setItem('back-apk-twa','1');
-    return sessionStorage.getItem('back-apk-twa')==='1';
+    if((document.referrer||'').indexOf('android-app://io.github.sofaleya.uprazhneniya')===0) localStorage.setItem('back-apk-twa','1');
+    return localStorage.getItem('back-apk-twa')==='1';
   }catch(e){ return false; }
 }
 function apkCur(){ try{ return (typeof AndroidApp!=='undefined' && typeof AndroidApp.versionCode==='function') ? (+AndroidApp.versionCode()||0) : 0; }catch(e){ return 0; } }
@@ -811,9 +811,9 @@ function apkCheck(){
     if(!apkIs()){ return; }
     const ts = +localStorage.getItem('back-apk-chk')||0;
     if(Date.now()-ts < 7*24*3600*1000){ apkPaint(); return; }
-    localStorage.setItem('back-apk-chk', String(Date.now()));
     fetch('https://api.github.com/repos/sofaleya/uprazhneniya/releases/tags/apk').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
       const m = j && String(j.body||'').match(/№(\d+)/); if(!m) return;
+      localStorage.setItem('back-apk-chk', String(Date.now()));
       // versionCode в сборке = номер запуска + 100 (см. android/app/build.gradle)
       localStorage.setItem('back-apk-last', String((+m[1])+100)); apkPaint();
     }).catch(function(){});
