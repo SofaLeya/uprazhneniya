@@ -223,6 +223,11 @@
   .demo-mus .str{background:#40e0d0}
   .demo-cap{margin-top:8px;font-size:13px;color:var(--text-dim);line-height:1.45}
   .demo-hint{margin-top:4px;font-size:11px;color:#6b6b78}
+  .apknote{margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--accent);display:flex;flex-direction:column;gap:6px;font-size:14px}
+  .apknote[hidden]{display:none}
+  .apknote .apk-btns{display:flex;gap:10px;margin-top:4px}
+  .apknote a,.apknote button{padding:8px 14px;border-radius:10px;border:1px solid var(--accent);color:inherit;background:transparent;font:inherit;font-weight:700;text-decoration:none}
+  .apknote a{background:var(--accent);color:#06201e}
   .today{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;margin:12px 0 4px;font-size:14px;line-height:1.45}
   .today b{color:var(--accent)}
   .week{display:flex;gap:6px;margin-top:10px}
@@ -287,6 +292,8 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-label" id="progressLabel">0 из 20 выполнено</div>
   </header>
+
+  <div class="apknote" id="apk-note" hidden></div>
 
   <div class="today" id="today"></div>
 
@@ -778,6 +785,41 @@ function planHtml(now){
   }
   return '<details class="hist"'+(planOpen?' open':'')+' ontoggle="planOpen=this.open"><summary>Что ждёт в ближайшие дни</summary>'+r+'</details>';
 }
+/* плашка «есть новая версия apk»: только внутри Android-приложения, проверка раз в неделю */
+var APK_URL = 'https://github.com/sofaleya/uprazhneniya/releases/latest/download/uprazhneniya.apk';
+function apkIs(){
+  try{
+    if(typeof AndroidApp!=='undefined') return true;
+    // старый apk из PWABuilder открывает сайт в Chrome без моста; его выдаёт referrer
+    if((document.referrer||'').indexOf('android-app://io.github.sofaleya.uprazhneniya')===0) sessionStorage.setItem('back-apk-twa','1');
+    return sessionStorage.getItem('back-apk-twa')==='1';
+  }catch(e){ return false; }
+}
+function apkCur(){ try{ return (typeof AndroidApp!=='undefined' && typeof AndroidApp.versionCode==='function') ? (+AndroidApp.versionCode()||0) : 0; }catch(e){ return 0; } }
+function apkPaint(){
+  const el = document.getElementById('apk-note'); if(!el) return;
+  try{
+    const last = +localStorage.getItem('back-apk-last')||0, skip = +localStorage.getItem('back-apk-skip')||0;
+    if(!apkIs() || !last || last<=apkCur() || skip>=last){ el.hidden = true; return; }
+    el.innerHTML = '<b>Есть новая версия приложения</b><span>Скачай файл и открой его: он встанет поверх старого. Если вход через Яндекс Диск подключён, данные подтянутся.</span><div class="apk-btns"><a href="'+APK_URL+'">Скачать</a><button type="button" id="apk-later">Позже</button></div>';
+    el.hidden = false;
+    document.getElementById('apk-later').onclick = function(){ try{ localStorage.setItem('back-apk-skip', String(last)); }catch(e){} apkPaint(); };
+  }catch(e){}
+}
+function apkCheck(){
+  try{
+    if(!apkIs()){ return; }
+    const ts = +localStorage.getItem('back-apk-chk')||0;
+    if(Date.now()-ts < 7*24*3600*1000){ apkPaint(); return; }
+    localStorage.setItem('back-apk-chk', String(Date.now()));
+    fetch('https://api.github.com/repos/sofaleya/uprazhneniya/releases/tags/apk').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      const m = j && String(j.body||'').match(/№(\d+)/); if(!m) return;
+      // versionCode в сборке = номер запуска + 100 (см. android/app/build.gradle)
+      localStorage.setItem('back-apk-last', String((+m[1])+100)); apkPaint();
+    }).catch(function(){});
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', apkCheck);
 /* напоминание: работает только в apk (там есть будильник Android) */
 function remApk(){ return typeof AndroidApp!=='undefined' && typeof AndroidApp.setReminder==='function'; }
 function remGet(){ return lget('back-routine-rem-v1', {}); }
