@@ -6,32 +6,75 @@
   function hash(s){ var h = 0; for(var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
   function pick(arr, seed){ return arr[hash(seed) % arr.length]; }
 
-  // Аватар: девушка с хвостиком и бирюзовой повязкой. mood: happy | cheer | soft | calm
+  // Аватар: чиби-девочка с двумя бирюзовыми хвостиками и кошачьими ушками.
+  // mood: happy | cheer | soft | calm | sick
   function face(mood){
-    var eyes, mouth, extra = '';
-    if(mood === 'cheer'){
-      eyes = '<path d="M38 50q5-7 10 0M62 50q5-7 10 0" stroke="#2b1b17" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      mouth = '<path d="M45 62q10 12 20 0z" fill="#c2415a"/>';
-      extra = '<g fill="#ffd166"><path d="M14 22l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z"/><path d="M96 16l2 4.5 4.5 2-4.5 2-2 4.5-2-4.5-4.5-2 4.5-2z"/></g>';
-    } else if(mood === 'soft'){
-      eyes = '<path d="M38 52q5 5 10 0M62 52q5 5 10 0" stroke="#2b1b17" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      mouth = '<path d="M48 64q7 5 14 0" stroke="#c2415a" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      extra = '<path d="M96 24c0-5 8-5 8 0 0-5 8-5 8 0 0 6-8 11-8 11s-8-5-8-11z" fill="#ff7a90" transform="translate(-8 -4) scale(.9)"/>';
-    } else if(mood === 'calm'){
-      eyes = '<circle cx="43" cy="50" r="3.2" fill="#2b1b17"/><circle cx="67" cy="50" r="3.2" fill="#2b1b17"/>';
-      mouth = '<path d="M48 63q7 4 14 0" stroke="#c2415a" stroke-width="3" fill="none" stroke-linecap="round"/>';
-    } else {
-      eyes = '<path d="M38 52q5-6 10 0M62 52q5-6 10 0" stroke="#2b1b17" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      mouth = '<path d="M46 62q9 9 18 0" stroke="#c2415a" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    var skin = '#ffe2cf', ink = '#1f3b4d', pink = '#ff8fa8', sick = mood === 'sick';
+    function eye(x){
+      return '<ellipse cx="'+x+'" cy="64" rx="6.2" ry="8" fill="'+ink+'"/>' +
+        '<ellipse cx="'+x+'" cy="67" rx="4.4" ry="4.6" fill="#30d5c8"/>' +
+        '<circle cx="'+(x+2)+'" cy="60.5" r="2.5" fill="#fff"/><circle cx="'+(x-2)+'" cy="68" r="1.3" fill="#fff"/>';
     }
-    return '<svg viewBox="0 0 120 110" width="76" height="70" aria-hidden="true">' +
-      '<path d="M86 40c22 4 24 30 10 44-4-14-8-22-14-26z" fill="#5a3426"/>' + // хвостик
-      '<circle cx="55" cy="52" r="32" fill="#ffd9c2"/>' +
-      '<path d="M22 50c-2-26 18-36 36-34 18 0 32 12 30 34-6-14-14-20-30-20S28 36 22 50z" fill="#5a3426"/>' + // волосы
-      '<path d="M23 40q32-18 64 0" stroke="#30d5c8" stroke-width="6" fill="none" stroke-linecap="round"/>' + // повязка
-      eyes +
-      '<circle cx="34" cy="60" r="4" fill="#ff9aa8" opacity=".6"/><circle cx="76" cy="60" r="4" fill="#ff9aa8" opacity=".6"/>' +
-      mouth + extra + '</svg>';
+    function arc(d, w){ return '<path d="'+d+'" stroke="'+ink+'" stroke-width="'+(w||3)+'" fill="none" stroke-linecap="round"/>'; }
+    function star(x, y, r){ return '<path d="M'+x+' '+(y-r)+'L'+(x+r*.3)+' '+(y-r*.3)+'L'+(x+r)+' '+y+'L'+(x+r*.3)+' '+(y+r*.3)+'L'+x+' '+(y+r)+'L'+(x-r*.3)+' '+(y+r*.3)+'L'+(x-r)+' '+y+'L'+(x-r*.3)+' '+(y-r*.3)+'Z" fill="#ffd166"/>'; }
+    function arm(d, hx, hy){ return '<path d="'+d+'" stroke="'+skin+'" stroke-width="6.5" fill="none" stroke-linecap="round"/><circle cx="'+hx+'" cy="'+hy+'" r="4.3" fill="'+skin+'"/>'; }
+
+    var s = '<svg viewBox="0 0 120 150" width="92" height="115" aria-hidden="true">' +
+      '<defs><linearGradient id="cgh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5eeadd"/><stop offset="1" stop-color="#1fb5aa"/></linearGradient></defs>' +
+      '<ellipse cx="60" cy="144" rx="22" ry="3.5" fill="#000" opacity=".28"/><g class="av">';
+    // хвост
+    s += '<g class="tail"><path d="M70 114C98 116 104 92 94 80" stroke="#1fb5aa" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="94" cy="80" r="3.8" fill="#8ff0e6"/></g>';
+    // два хвостика
+    s += '<g class="tw-l"><path d="M36 40C8 40 2 86 18 112C22 96 30 76 42 60Z" fill="url(#cgh)"/><circle cx="36" cy="42" r="4.8" fill="#ff7aa8"/></g>';
+    s += '<g class="tw-r"><path d="M84 40C112 40 118 86 102 112C98 96 90 76 78 60Z" fill="url(#cgh)"/><circle cx="84" cy="42" r="4.8" fill="#ff7aa8"/></g>';
+    // кошачьи ушки
+    s += '<g class="ear-l"><path d="M32 38L28 6L58 22Z" fill="#1fb5aa"/><path d="M36 32L33 15L48 24Z" fill="#ff9fb5"/></g>';
+    s += '<g class="ear-r"><path d="M88 38L92 6L62 22Z" fill="#1fb5aa"/><path d="M84 32L87 15L72 24Z" fill="#ff9fb5"/></g>';
+    // тело
+    if(!sick){
+      s += '<rect x="51" y="118" width="7" height="17" rx="3.2" fill="'+skin+'"/><rect x="62" y="118" width="7" height="17" rx="3.2" fill="'+skin+'"/>' +
+        '<ellipse cx="54.5" cy="138" rx="7.5" ry="4.2" fill="#fff"/><ellipse cx="65.5" cy="138" rx="7.5" ry="4.2" fill="#fff"/>' +
+        '<path d="M47 140h15M58 140h15" stroke="#30d5c8" stroke-width="2" stroke-linecap="round"/>' +
+        '<path d="M49 106h22l3 13H62l-2-5-2 5H46z" fill="#243b55"/>' +
+        '<rect x="49" y="88" width="22" height="21" rx="7" fill="#f4f7f8"/><rect x="49" y="98" width="22" height="3.6" fill="#30d5c8"/>';
+    } else {
+      s += '<path d="M30 98Q60 84 90 98L94 138Q60 149 26 138Z" fill="#f2a9bd"/>' +
+        '<path d="M28 112L93 112M27 124L94 124M44 100L42 144M60 96L60 146M76 100L78 144" stroke="#e8869f" stroke-width="2.2"/>' +
+        '<path d="M30 98Q60 84 90 98L88 107Q60 95 32 107Z" fill="#fde2ea"/>';
+    }
+    // голова
+    s += '<ellipse cx="60" cy="58" rx="35" ry="32" fill="'+skin+'"/>' +
+      '<path d="M25 58C21 26 42 17 60 17C78 17 99 26 95 58C93 48 90 41 84 37L78 47L70 33L62 48L54 33L46 47L38 37C30 42 27 49 25 58Z" fill="url(#cgh)"/>' +
+      '<path d="M44 25C52 21 64 21 74 25" stroke="#c4fbf5" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>';
+    // лицо
+    var cheeks = '<ellipse cx="35" cy="74" rx="6" ry="3.6" fill="'+pink+'" opacity="'+(sick?'.8':'.55')+'"/><ellipse cx="85" cy="74" rx="6" ry="3.6" fill="'+pink+'" opacity="'+(sick?'.8':'.55')+'"/>';
+    var omega = '<path d="M54 76Q57 80 60 76Q63 80 66 76" stroke="#c2415a" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+    if(mood === 'cheer'){
+      s += arc('M38 67Q45 57 52 67', 3.2) + arc('M68 67Q75 57 82 67', 3.2) + cheeks +
+        '<path d="M52 73Q60 91 68 73Z" fill="#d6455f"/><path d="M56 82Q60 87 64 82Q60 79 56 82Z" fill="#ff8fa8"/>';
+    } else if(mood === 'soft'){
+      s += eye(45) + eye(75) + arc('M38 55L52 50', 2.2) + arc('M68 50L82 55', 2.2) + cheeks +
+        '<path d="M55 77Q60 80 65 77" stroke="#c2415a" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+    } else if(mood === 'sick'){
+      s += arc('M38 64Q45 69 52 64', 2.8) + arc('M68 64Q75 69 82 64', 2.8) + cheeks +
+        '<path d="M55 78Q57.5 76 60 78Q62.5 80 65 78" stroke="#c2415a" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+        '<path d="M96 42c-4 6-6 9-6 12a6 6 0 0 0 12 0c0-3-2-6-6-12z" fill="#8fd3ff"/>';
+    } else {
+      s += eye(45) + eye(75) + cheeks + omega;
+    }
+    // руки
+    if(mood === 'cheer'){
+      s += arm('M50 94Q16 100 12 52', 12, 50) + arm('M70 94Q104 100 108 52', 108, 50) + star(6, 20, 7) + star(114, 16, 6) + star(100, 30, 4);
+    } else if(mood === 'soft'){
+      s += arm('M50 94Q42 102 43 112', 43, 113) + arm('M70 94Q92 92 96 70', 96, 68) + star(108, 46, 4.5);
+    } else if(mood === 'sick'){
+      s += '<circle cx="45" cy="95" r="4.3" fill="'+skin+'"/><circle cx="75" cy="95" r="4.3" fill="'+skin+'"/>';
+    } else if(mood === 'happy'){
+      s += arm('M50 94Q42 102 43 112', 43, 113) + '<g class="wave">' + arm('M70 94Q88 90 94 74', 94, 72) + '</g>';
+    } else {
+      s += arm('M50 94Q42 102 43 112', 43, 113) + arm('M70 94Q78 102 77 112', 77, 113);
+    }
+    return s + '</g></svg>';
   }
 
   // Выбор настроения и фразы
@@ -40,7 +83,7 @@
     var s = c.streak || 0, m, t;
 
     if(c.sick){
-      return {mood:'soft', t: pick([
+      return {mood:'sick', t: pick([
         'Отдыхай и ни о чём не переживай. Серия никуда не денется, я её сохраню. Главное сейчас - выздороветь 💛',
         'Болеешь - значит, твоя работа сегодня только одна: лечиться. Я подожду, сколько нужно.',
         'Пауза - это тоже часть пути. Пей тёплое, спи побольше. Вернёшься, и мы начнём мягко.'
@@ -103,10 +146,11 @@
 
   window.COACH = {
     name: NAME,
+    hop: function(el){ var c = el.closest('.coach'); if(!c) return; c.classList.remove('jump'); void c.offsetWidth; c.classList.add('jump'); },
     html: function(c){
       c.day = c.day || '';
       var r = say(c);
-      return '<div class="coach"><div class="coach-ava">' + face(r.mood) + '</div>' +
+      return '<div class="coach'+(c.jump?' jump':'')+'"><div class="coach-ava" onclick="COACH.hop(this)">' + face(r.mood) + '</div>' +
         '<div class="coach-msg"><div class="coach-name">' + NAME + ', твой тренер</div>' + r.t + '</div></div>';
     }
   };
