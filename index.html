@@ -249,6 +249,10 @@
   .plan-note{font-size:12px;color:var(--text-dim);margin-bottom:8px}
   .pcard{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px 16px;margin-bottom:10px}
   .cheer{margin-top:8px;font-size:13px;color:#6ee7a8}
+  .coach{display:flex;gap:10px;align-items:center;margin:0 0 12px;padding:10px 12px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--card-border)}
+  .coach-ava{flex:none;width:76px;height:70px}
+  .coach-msg{font-size:14px;line-height:1.45}
+  .coach-name{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
   .hide{display:none!important}
@@ -602,6 +606,7 @@
 </div>
 
 <script src="anim.js" defer></script>
+<script src="coach.js"></script>
 <script src="tgbk.js"></script>
 <script src="ydsync.js"></script>
 <script>
@@ -609,6 +614,8 @@ const KEY = 'back-routine-done-v1';
 const DKEY = 'back-routine-date-v1';
 const LKEY = 'back-routine-log-v1';
 const SKEY = 'back-routine-sick-v1';
+const CKEY = 'back-routine-coach-v1';
+const BACKKEY = 'back-routine-back-v1';
 const NEED = 0.6; // доля упражнений, после которой день считается тренировкой
 function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function lget(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null ? def : v; }catch(e){ return def; } }
@@ -671,7 +678,7 @@ function setSick(on){
   else { // выздоровела: паузы фиксируем в истории
     const s = sickStart();
     if(s){ for(let d=new Date(s+'T00:00:00'); ymd(d)<=ymd(now); d.setDate(d.getDate()+1)){ if(!isTrained(log,d)) log[ymd(d)] = -1; } }
-    lset(LKEY, log); lset(SKEY, null);
+    lset(LKEY, log); lset(SKEY, null); lset(BACKKEY, ymd(now));
   }
   renderToday();
 }
@@ -805,11 +812,27 @@ function renderToday(){
     ? '<div class="bdg got"><b>'+b.i+'</b>'+b.n+'</div>'
     : '<div class="bdg"><b>'+b.i+'</b>'+b.n+'<br>ещё '+(b.need-b.v)+'</div>').join('')+'</div>';
   const nextB = BD.find(b => b.v<b.need);
-  const cheer = !sick && isTrained(log,now) ? '<div class="cheer">Тренировка засчитана 🎉'+(streak>1?' Серия: '+streak+'.':'')+'</div>' : '';
+  // тренер Мира
+  const trainedToday = !sick && isTrained(log,now);
+  const earned = BD.filter(b => b.v>=b.need);
+  let cs = lget(CKEY, null);
+  if(!cs){ cs = {n:earned.length, day:'', name:''}; lset(CKEY, cs); }
+  else if(earned.length < cs.n){ cs.n = earned.length; lset(CKEY, cs); }
+  else if(earned.length > cs.n && !sick){ const nb = earned[earned.length-1]; cs = {n:earned.length, day:ymd(now), name:nb.i+' «'+nb.n+'»'}; lset(CKEY, cs); }
+  const backD = lget(BACKKEY, null);
+  const backNow = !sick && backD && (now - new Date(backD+'T00:00:00')) < 3*86400000 && !trainedToday;
+  const cheer = (typeof COACH!=='undefined') ? COACH.html({
+    day: ymd(now), sick: sick, trainedToday: trainedToday, planToday: PLAN[dow]||'',
+    streak: streak, best: best, allN: allN,
+    back: !!backNow || (trainedToday && backD && backD===ymd(now)),
+    broken: !sick && !trainedToday && allN>0 && streak===0,
+    newBadge: (trainedToday && cs.day===ymd(now)) ? cs.name : '',
+    state: sick ? 's' : trainedToday ? 't' : 'n'
+  }) : '';
   const sickBtn = sick
     ? '<button type="button" class="linkbtn" onclick="setSick(false)">Я выздоровела, возвращаюсь</button><div class="stat">После болезни первую неделю делай примерно половину подходов и сразу бросай при слабости, головокружении или боли.</div>'
     : '<button type="button" class="linkbtn" onclick="setSick(true)">Я заболела / нужна пауза</button>';
-  el.innerHTML = msg + cheer + '<div>'+sickBtn+'</div>' +
+  el.innerHTML = cheer + msg + '<div>'+sickBtn+'</div>' +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего: '+allN+
     (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>' +
     planHtml(now) + '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary>История и награды'+(nextB?' · следующая: '+nextB.i+' '+nextB.n:'')+'</summary>'+cells+
