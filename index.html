@@ -607,6 +607,15 @@
     </div>
   </div>
 
+  <details class="howto" id="rem-box" hidden><summary>Напоминание о тренировке</summary>
+    <p style="margin:10px 0 8px;color:var(--text-dim)">В тренировочные дни (пн, ср, пт) придёт уведомление «Сегодня тренировка», а в среду «Сегодня облегчённая тренировка». Если тренировка уже сделана или ты болеешь, оно не придёт. Время может сдвинуться на пару минут: так устроены уведомления Android.</p>
+    <div class="toolbar" style="text-align:left;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="time" id="rem-t" value="11:00" style="background:var(--card);color:var(--text);border:1px solid var(--card-border);border-radius:10px;padding:6px 10px;font:inherit">
+      <button type="button" id="rem-btn">Включить</button>
+    </div>
+    <p style="margin:8px 0 0;color:var(--text-dim)" id="rem-st"></p>
+  </details>
+
   <details class="howto" id="bk"><summary>Резервная копия</summary>
     <p style="margin:10px 0 8px;color:var(--text-dim)" id="bk-status">Отметки и журнал тренировок хранятся только в этом браузере. Скачай копию или подключи Телеграм — тогда копия будет приходить сама.</p>
     <div class="toolbar" style="text-align:left;display:flex;gap:8px;flex-wrap:wrap">
@@ -769,7 +778,42 @@ function planHtml(now){
   }
   return '<details class="hist"'+(planOpen?' open':'')+' ontoggle="planOpen=this.open"><summary>Что ждёт в ближайшие дни</summary>'+r+'</details>';
 }
+/* напоминание: работает только в apk (там есть будильник Android) */
+function remApk(){ return typeof AndroidApp!=='undefined' && typeof AndroidApp.setReminder==='function'; }
+function remGet(){ return lget('back-routine-rem-v1', {}); }
+function remSet(o){ lset('back-routine-rem-v1', o); }
+function remSync(){
+  if(!remApk()) return;
+  try{
+    const o = remGet(), now = new Date(), log = lget(LKEY, {}), tm = (o.t||'11:00').split(':');
+    const done = isTrained(log, now) || log[ymd(now)]===-1;
+    let days = ''; for(let i=0;i<7;i++) days += PLAN[i]==='train' ? (i===3?'l':'t') : 'n';
+    AndroidApp.setReminder(!!o.on, +tm[0]||0, +tm[1]||0, done ? ymd(now) : '', !!sickStart(), days);
+  }catch(e){}
+}
+function remPaint(){
+  const box = document.getElementById('rem-box'); if(!box) return;
+  if(!remApk()){ box.hidden = true; return; }
+  box.hidden = false;
+  const o = remGet();
+  document.getElementById('rem-t').value = o.t || '11:00';
+  document.getElementById('rem-btn').textContent = o.on ? 'Выключить' : 'Включить';
+}
+function remStatus(t){ const e=document.getElementById('rem-st'); if(e) e.textContent = t||''; }
+document.addEventListener('DOMContentLoaded', function(){
+  const b = document.getElementById('rem-btn'), t = document.getElementById('rem-t'); if(!b||!t) return;
+  b.addEventListener('click', function(){
+    if(!remApk()) return;
+    const o = remGet();
+    if(!o.on && !AndroidApp.notificationsAllowed()){ AndroidApp.askNotifications(); remStatus('Разреши уведомления и нажми «Включить» ещё раз'); return; }
+    o.on = !o.on; remSet(o); remSync(); remPaint();
+    remStatus(o.on ? 'Включено: напомню в '+(o.t||'11:00')+' по пн, ср и пт' : 'Выключено');
+  });
+  t.addEventListener('change', function(){ if(/^\d\d:\d\d$/.test(t.value)){ const o = remGet(); o.t = t.value; remSet(o); remSync(); } });
+  remPaint();
+});
 function renderToday(){
+  try{ remSync(); }catch(e){}
   const el = document.getElementById('today'); if(!el) return;
   const now = new Date(), dow = now.getDay(), log = lget(LKEY, {});
   const need = needFor(now);
