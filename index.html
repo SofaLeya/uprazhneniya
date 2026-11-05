@@ -814,6 +814,24 @@ function renderToday(){
   const nextB = BD.find(b => b.v<b.need);
   // тренер Мира
   const trainedToday = !sick && isTrained(log,now);
+  // пропуск без болезни: сколько тренировок было в прервавшейся серии, сколько дней прошло, когда ближайшая тренировка
+  let lost = 0;
+  if(streak===0){
+    let missed = false;
+    for(let i=0;i<180;i++){
+      const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
+      if(PLAN[d.getDay()]!=='train') continue;
+      if(isPaused(log,d) && !isTrained(log,d)) continue;
+      if(isTrained(log,d)){ if(missed) lost++; }
+      else if(i===0) continue;
+      else if(!missed) missed = true; else break;
+    }
+  }
+  let lastT = null;
+  Object.keys(log).forEach(k => { const d=new Date(k+'T00:00:00'); if(log[k] >= needFor(d) && (!lastT || k>lastT)) lastT = k; });
+  const gap = lastT ? Math.round((new Date(ymd(now)+'T00:00:00') - new Date(lastT+'T00:00:00'))/86400000) : 0;
+  let nextT = '';
+  for(let j=1;j<=7 && !nextT;j++){ const d=new Date(now); d.setDate(d.getDate()+j); if(PLAN[d.getDay()]==='train') nextT = {1:'в понедельник',3:'в среду',5:'в пятницу'}[d.getDay()]; }
   const earned = BD.filter(b => b.v>=b.need);
   let cs = lget(CKEY, null);
   if(!cs){ cs = {n:earned.length, day:'', name:''}; lset(CKEY, cs); }
@@ -826,6 +844,8 @@ function renderToday(){
     streak: streak, best: best, allN: allN,
     back: !!backNow || (trainedToday && backD && backD===ymd(now)),
     broken: !sick && !trainedToday && allN>0 && streak===0,
+    lost: lost, gap: gap, nextT: nextT, hour: now.getHours(),
+    restart: trainedToday && streak===1 && best>1,
     newBadge: (trainedToday && cs.day===ymd(now)) ? cs.name : '',
     state: sick ? 's' : trainedToday ? 't' : 'n'
   }) : '';
