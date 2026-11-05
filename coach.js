@@ -17,7 +17,7 @@
     }
     function arc(d, w){ return '<path d="'+d+'" stroke="'+ink+'" stroke-width="'+(w||3)+'" fill="none" stroke-linecap="round"/>'; }
     function star(x, y, r){ return '<path d="M'+x+' '+(y-r)+'L'+(x+r*.3)+' '+(y-r*.3)+'L'+(x+r)+' '+y+'L'+(x+r*.3)+' '+(y+r*.3)+'L'+x+' '+(y+r)+'L'+(x-r*.3)+' '+(y+r*.3)+'L'+(x-r)+' '+y+'L'+(x-r*.3)+' '+(y-r*.3)+'Z" fill="#ffd166"/>'; }
-    function arm(d, hx, hy){ return '<path d="'+d+'" stroke="'+skin+'" stroke-width="6.5" fill="none" stroke-linecap="round"/><circle cx="'+hx+'" cy="'+hy+'" r="4.3" fill="'+skin+'"/>'; }
+    function arm(d, hx, hy){ return '<path d="'+d+'" stroke="'+skin+'" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="'+hx+'" cy="'+hy+'" r="5.2" fill="'+skin+'"/>'; }
 
     var s = '<svg viewBox="0 0 120 150" width="92" height="115" aria-hidden="true">' +
       '<defs><linearGradient id="cgh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5eeadd"/><stop offset="1" stop-color="#1fb5aa"/></linearGradient></defs>' +
@@ -64,15 +64,15 @@
     }
     // руки
     if(mood === 'cheer'){
-      s += arm('M50 94Q16 100 12 52', 12, 50) + arm('M70 94Q104 100 108 52', 108, 50) + star(6, 20, 7) + star(114, 16, 6) + star(100, 30, 4);
+      s += arm('M51 97Q28 100 20 68', 19, 65) + arm('M69 97Q92 100 100 68', 101, 65) + star(8, 28, 7) + star(112, 24, 6) + star(100, 36, 4);
     } else if(mood === 'soft'){
-      s += arm('M50 94Q42 102 43 112', 43, 113) + arm('M70 94Q92 92 96 70', 96, 68) + star(108, 46, 4.5);
+      s += arm('M51 97Q46 103 46 109', 46, 110) + arm('M69 97Q88 96 96 72', 96, 69) + star(108, 46, 4.5);
     } else if(mood === 'sick'){
       s += '<circle cx="45" cy="95" r="4.3" fill="'+skin+'"/><circle cx="75" cy="95" r="4.3" fill="'+skin+'"/>';
     } else if(mood === 'happy'){
-      s += arm('M50 94Q42 102 43 112', 43, 113) + '<g class="wave">' + arm('M70 94Q88 90 94 74', 94, 72) + '</g>';
+      s += arm('M51 97Q46 103 46 109', 46, 110) + '<g class="wave">' + arm('M69 97Q86 96 94 78', 94, 75) + '</g>';
     } else {
-      s += arm('M50 94Q42 102 43 112', 43, 113) + arm('M70 94Q78 102 77 112', 77, 113);
+      s += arm('M51 97Q46 103 46 109', 46, 110) + arm('M69 97Q74 103 74 109', 74, 110);
     }
     return s + '</g></svg>';
   }
