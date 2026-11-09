@@ -75,7 +75,7 @@
     font-weight: 600;
   }
   .group-title:first-of-type{ margin-top: 8px; }
-  .group-title{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .group-foot{ display:flex; justify-content:flex-end; margin:-2px 4px 0; }
   .gall{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
     background:none; border:0; padding:4px 0; margin:0; font:inherit;
@@ -709,7 +709,7 @@ function groupCards(t){
 }
 function refreshGroups(){
   document.querySelectorAll('.group-title').forEach(t => {
-    const b = t.querySelector('.gall'); if(!b) return;
+    const b = t._foot && t._foot.querySelector('.gall'); if(!b) return;
     const cs = groupCards(t), k = cs.filter(c => c.classList.contains('done')).length;
     const on = cs.length>0 && k===cs.length, mix = k>0 && !on;
     b.classList.toggle('on', on); b.classList.toggle('mix', mix);
@@ -727,8 +727,16 @@ document.querySelectorAll('.group-title').forEach(t => {
   b.setAttribute('aria-label','Отметить весь блок: '+t.textContent.trim());
   b.innerHTML = 'Весь блок<span class="gbox"></span>';
   b.addEventListener('click', () => toggleGroup(t));
-  t.append(b);
+  const f = document.createElement('div'); f.className = 'group-foot'; f.append(b);
+  t._foot = f; t.after(f);
 });
+function placeFooters(){ // общая отметка блока стоит под последней карточкой блока
+  document.querySelectorAll('.group-title').forEach(t => {
+    let n = t.nextElementSibling, last = null;
+    while(n && !n.classList.contains('group-title')){ if(n.classList.contains('card')) last = n; n = n.nextElementSibling; }
+    if(last && t._foot) last.after(t._foot);
+  });
+}
 const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
 const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 const TOTAL = document.querySelectorAll('.card:not([data-bike])').length;
@@ -770,7 +778,9 @@ function applyDay(){
     let n = t.nextElementSibling, any = false;
     while(n && !n.classList.contains('group-title')){ if(n.classList.contains('card') && !n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
     t.classList.toggle('hide', !any);
+    if(t._foot) t._foot.classList.toggle('hide', !any);
   });
+  placeFooters();
   document.querySelectorAll('.card').forEach(c => {
     const row = [...c.querySelectorAll('.row')].find(r => r.textContent.trim().startsWith('Подходы'));
     if(!row) return;
