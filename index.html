@@ -659,8 +659,8 @@
 <script src="tgbk.js"></script>
 <script src="ydsync.js"></script>
 <script>
-const KEY = 'back-routine-done-v1';
-const DKEY = 'back-routine-date-v1';
+// отметки хранятся отдельно на каждый день: так синхронизация с Диском не притащит вчерашние галочки в сегодня
+const DONEP = 'back-routine-done-';
 const LKEY = 'back-routine-log-v1';
 const SKEY = 'back-routine-sick-v1';
 const CKEY = 'back-routine-coach-v1';
@@ -668,6 +668,7 @@ const STKEY = 'back-routine-coach-streak-v1';
 const BACKKEY = 'back-routine-back-v1';
 const NEED = 0.6; // доля упражнений, после которой день считается тренировкой
 function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const KEY = DONEP + ymd(new Date());
 function lget(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null ? def : v; }catch(e){ return def; } }
 function lset(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 function load(){ return lget(KEY, []); }
@@ -1027,9 +1028,14 @@ document.querySelectorAll('.card-head').forEach(h => {
   h.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleCard(h); } });
 });
 // новый день: отметки сбрасываются, история остаётся
-const today = ymd(new Date());
-if(lget(DKEY, '') !== today){ lset(KEY, []); }
-lset(DKEY, today);
+// новый день = новый ключ; старые ключи (и прежний общий формат) убираем, оставляем пару последних дней
+try{
+  const keep = new Set([0,1,2].map(i => DONEP + ymd(new Date(Date.now() - i*864e5))));
+  const old = [];
+  for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i);
+    if(k && (k==='back-routine-done-v1' || k==='back-routine-date-v1' || (k.indexOf(DONEP)===0 && !keep.has(k)))) old.push(k); }
+  old.forEach(k => localStorage.removeItem(k));
+}catch(e){}
 load().forEach(id => {
   const card = document.querySelector('.card[data-id="'+id+'"]');
   if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
