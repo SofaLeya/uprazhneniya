@@ -297,6 +297,8 @@
   .coach-name{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
   .wd.now span{color:var(--accent);font-weight:700}
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
+  .greybtn{display:inline-block;margin-top:10px;background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid var(--card-border);border-radius:999px;padding:8px 16px;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .greybtn:active{background:rgba(255,255,255,0.08);color:var(--text)}
   .hide{display:none!important}
   .stat{margin-top:8px;font-size:12px;color:var(--text-dim)}
 </style>
@@ -1019,8 +1021,8 @@ function renderToday(){
     state: sick ? 's' : trainedToday ? 't' : 'n'
   }) : '';
   const sickBtn = sick
-    ? '<button type="button" class="linkbtn" onclick="setSick(false)">Я выздоровела, возвращаюсь</button><div class="stat">После болезни первую неделю делай примерно половину подходов и сразу бросай при слабости, головокружении или боли.</div>'
-    : '<button type="button" class="linkbtn" onclick="setSick(true)">Я заболела / нужна пауза</button>';
+    ? '<button type="button" class="greybtn" onclick="setSick(false)">Я выздоровела, возвращаюсь</button><div class="stat">После болезни первую неделю делай примерно половину подходов и сразу бросай при слабости, головокружении или боли.</div>'
+    : '<button type="button" class="greybtn" onclick="setSick(true)">🤒 Я заболела / нужна пауза</button>';
   el.innerHTML = cheer + msg + '<div>'+sickBtn+'</div>' +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего: '+allN+
     (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>' +
