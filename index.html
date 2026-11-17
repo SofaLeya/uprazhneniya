@@ -265,6 +265,7 @@
   .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .bdg{flex:1 1 30%;min-width:96px;text-align:center;border:1px solid var(--card-border);border-radius:12px;padding:8px 4px;font-size:11px;color:var(--text-dim);opacity:.5;filter:grayscale(1)}
   .bdg b{display:block;font-size:22px;font-weight:400;margin-bottom:2px}
+  .bdg-more{text-align:center;font-size:12px;color:var(--text-dim);margin-top:8px}
   .bdg.got{opacity:1;filter:none;border-color:rgba(255,200,87,.6);background:rgba(255,200,87,.08);color:var(--text)}
   .plan-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--card-border);font-size:13px;line-height:1.35}
   .plan-row b{flex:none;width:58px;color:var(--accent)}
@@ -969,17 +970,35 @@ function renderToday(){
       else if(ymd(d)!==ymd(t1)) run=0;
     }
   }
-  const BD = [
-    {i:'🌱', n:'Первый шаг', v:allN, need:1, hint:'1 тренировка'},
-    {i:'🔥', n:'Неделя без пропусков', v:best, need:3, hint:'3 тренировки подряд'},
-    {i:'💪', n:'Две недели', v:best, need:6, hint:'6 подряд'},
-    {i:'🏅', n:'Месяц', v:best, need:12, hint:'12 подряд'},
-    {i:'⭐', n:'20 тренировок', v:allN, need:20, hint:'всего 20'},
-    {i:'🏆', n:'Три месяца', v:best, need:36, hint:'36 подряд'}
+  const BD = [ // по порядку, в котором награды обычно приходят
+    {i:'🌱', n:'Первый шаг', v:allN, need:1},
+    {i:'🔥', n:'Неделя без пропусков', v:best, need:3},
+    {i:'💪', n:'Две недели', v:best, need:6},
+    {i:'✨', n:'10 тренировок', v:allN, need:10},
+    {i:'🏅', n:'Месяц', v:best, need:12},
+    {i:'🎯', n:'Пять недель', v:best, need:15},
+    {i:'🌟', n:'Шесть недель', v:best, need:18},
+    {i:'⭐', n:'20 тренировок', v:allN, need:20},
+    {i:'💎', n:'Два месяца', v:best, need:24},
+    {i:'🚀', n:'30 тренировок', v:allN, need:30},
+    {i:'🎖️', n:'Десять недель', v:best, need:30},
+    {i:'🏆', n:'Три месяца', v:best, need:36},
+    {i:'🌙', n:'40 тренировок', v:allN, need:40},
+    {i:'🐉', n:'Четыре месяца', v:best, need:48},
+    {i:'🎉', n:'50 тренировок', v:allN, need:50},
+    {i:'🦋', n:'Пять месяцев', v:best, need:60},
+    {i:'🌸', n:'Полгода', v:best, need:72},
+    {i:'🍀', n:'75 тренировок', v:allN, need:75},
+    {i:'🌊', n:'Девять месяцев', v:best, need:108},
+    {i:'💯', n:'100 тренировок', v:allN, need:100},
+    {i:'🦄', n:'150 тренировок', v:allN, need:150},
+    {i:'👑', n:'Год', v:best, need:156}
   ];
-  const badges = '<div class="badges">'+BD.map(b => b.v>=b.need
-    ? '<div class="bdg got"><b>'+b.i+'</b>'+b.n+'</div>'
-    : '<div class="bdg"><b>'+b.i+'</b>'+b.n+'<br>ещё '+(b.need-b.v)+'</div>').join('')+'</div>';
+  BD.sort((x,y) => x.need-y.need);
+  const gotB = BD.filter(b => b.v>=b.need), lockB = BD.filter(b => b.v<b.need);
+  const badges = '<div class="badges">'+gotB.map(b => '<div class="bdg got"><b>'+b.i+'</b>'+b.n+'</div>').join('')
+    + lockB.slice(0,3).map(b => '<div class="bdg"><b>'+b.i+'</b>'+b.n+'<br>ещё '+(b.need-b.v)+'</div>').join('')+'</div>'
+    + (lockB.length>3 ? '<div class="bdg-more">и ещё '+(lockB.length-3)+' наград впереди</div>' : '');
   const nextB = BD.find(b => b.v<b.need);
   // тренер Мира
   const trainedToday = !sick && isTrained(log,now);
