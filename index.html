@@ -303,6 +303,29 @@
   .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;padding:0;margin-top:6px;text-decoration:underline;cursor:pointer}
   .greybtn{display:inline-block;margin-top:10px;background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid var(--card-border);border-radius:999px;padding:8px 16px;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .greybtn:active{background:rgba(255,255,255,0.08);color:var(--text)}
+  .rec{border-top:1px dashed var(--card-border);padding-top:10px;display:grid;gap:6px}
+  .rec-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .rec-l{font-size:13px;color:var(--text-dim)}
+  .rec input,.rec select{background:var(--bg);color:var(--text);border:1px solid var(--card-border);border-radius:10px;padding:7px 10px;font:inherit;font-size:14px;min-width:0}
+  .rec input:focus,.rec select:focus{outline:none;border-color:var(--accent)}
+  .rec-n{width:96px}.rec-kg{width:62px}
+  .rec-u{font-size:13px;color:var(--text-dim)}
+  .rec-h{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-dim)}
+  .rec-list{flex:1;min-width:0}
+  .rec-list span{display:inline-block;margin-right:10px;white-space:nowrap}
+  .card-body>*{min-width:0}
+  .spark{flex:none;color:var(--accent)}
+  .mhead{display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px}
+  .mnav{background:none;border:1px solid var(--card-border);color:var(--text);width:34px;height:34px;border-radius:10px;font-size:18px;cursor:pointer}
+  .mnav:disabled{opacity:.3;cursor:default}
+  .mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .mwd{text-align:center;font-size:11px;color:var(--text-dim)}
+  .mgrid .wd i{height:42px;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:14px}
+  .mgrid .wd i small{font-size:10px;color:var(--text-dim)}
+  .mgrid .wd.now i{outline:2px solid var(--accent);outline-offset:1px}
+  .mgrid .wd.fut i{opacity:.45}
+  .swl{display:flex;gap:10px;align-items:center;margin-top:10px;cursor:pointer}
+  .swl input{width:20px;height:20px;accent-color:var(--accent)}
   .hide{display:none!important}
   .stat{margin-top:8px;font-size:12px;color:var(--text-dim)}
 </style>
@@ -497,7 +520,7 @@
       <div class="tags"><span class="tag new">силовое · на тренажёре</span></div>
     </div>
   </div>
-<div class="group-title">Верх тела (без веса)</div>
+<div class="group-title">Верх тела</div>
   <div class="card" data-id="21">
     <div class="card-head" onclick="toggleCard(this)">
       <div class="card-title-row">
@@ -530,6 +553,22 @@
       <div class="row"><b>Подходы:</b> 2 подхода по 10–12 раз.</div>
       <div class="row important"><b>Важно:</b> Руки почти прямые, плечи вниз. Не прогибай поясницу — живот слегка подтянут. Тканевая резинка растягивается мало, это нормально: амплитуда небольшая. Если слишком туго или плечи ещё болят, делай то же движение без резинки, в конце на 2 секунды сведи лопатки.</div>
       <div class="tags"><span class="tag new">с резинкой · верх</span></div>
+    </div>
+  </div>
+  <div class="card" data-id="25" data-opt="1">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title-row">
+        <div class="num">11</div>
+        <h3 class="card-title">Тяга гантели одной рукой с опорой</h3>
+      </div>
+      <div class="checkbox"></div>
+    </div>
+    <div class="card-body">
+      <div class="row"><b>Как:</b> Левая рука и левое колено на стуле или краю дивана, правая нога стоит на полу. Корпус почти параллельно полу. Гантель в правой руке, рука свободно висит вниз. Тяни гантель к поясу, локоть идёт назад вдоль тела, лопатка к позвоночнику. Медленно опусти. Потом поменяй сторону.</div>
+      <div class="row"><b>Дыхание:</b> Выдох - тянем, вдох - опускаем.</div>
+      <div class="row"><b>Подходы:</b> 2 подхода по 10–12 раз на каждую руку. Вес: начни с 2–3 кг, прибавляй, когда 2×12 даётся легко.</div>
+      <div class="row important"><b>Важно:</b> Корпус не скручивается вслед за гантелью, плечо не тянется к уху, без рывков. Поясница не проваливается. Если тянет поясницу, поставь опорную руку повыше, например на спинку дивана.</div>
+      <div class="tags"><span class="tag new">с гантелью · верх · если есть гантели</span></div>
     </div>
   </div>
   <div class="card" data-id="24">
@@ -640,6 +679,11 @@
     </div>
   </div>
 
+  <details class="howto" id="dumb-box"><summary>Гантели</summary>
+    <label class="swl"><input type="checkbox" id="dumb-on"> <span>У меня есть гантели: показывать тягу гантели в тренировке</span></label>
+    <p style="margin:8px 0 0;color:var(--text-dim)">Это дополнительное упражнение: для зачёта тренировки оно не обязательно.</p>
+  </details>
+
   <details class="howto" id="rem-box" hidden><summary>Напоминание о тренировке</summary>
     <p style="margin:10px 0 8px;color:var(--text-dim)">В тренировочные дни (пн, ср, пт) придёт уведомление «Сегодня тренировка», а в среду «Сегодня облегчённая тренировка». Если тренировка уже сделана или ты болеешь, оно не придёт. Время может сдвинуться на пару минут: так устроены уведомления Android.</p>
     <div class="toolbar" style="text-align:left;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -677,6 +721,10 @@ const SKEY = 'back-routine-sick-v1';
 const CKEY = 'back-routine-coach-v1';
 const STKEY = 'back-routine-coach-streak-v1';
 const BACKKEY = 'back-routine-back-v1';
+const LIGHTKEY = 'back-routine-light-v1';  // {день: 1} - облегчённо в любой день
+const MOVEKEY = 'back-routine-move-v1';    // {куда: откуда} - перенос тренировки
+const RECKEY = 'back-routine-rec-v1';      // {день: {id: {n, b, kg, k}}} - что сделала
+const DUMBKEY = 'back-routine-dumb-v1';    // есть гантели
 const NEED = 0.6; // доля упражнений, после которой день считается тренировкой
 function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const KEY = DONEP + ymd(new Date());
@@ -689,6 +737,10 @@ function save(){
   const log = lget(LKEY, {});
   log[ymd(new Date())] = ids.length;
   lset(LKEY, log);
+  // кардио: отметка велика / прогулки остаётся в журнале навсегда
+  const rec = lget(RECKEY, {}), dk = ymd(new Date()), r30 = (rec[dk]||{})['30'];
+  if(ids.includes('30')){ if(!r30){ rec[dk] = rec[dk]||{}; rec[dk]['30'] = {k:'bike'}; lset(RECKEY, rec); } }
+  else if(r30 && !r30.n){ delete rec[dk]['30']; if(!Object.keys(rec[dk]).length) delete rec[dk]; lset(RECKEY, rec); }
 }
 function toggleCard(headEl){
   const card = headEl.closest('.card');
@@ -752,7 +804,15 @@ function placeFooters(){ // общая отметка блока стоит по
 }
 const PLAN = {1:'train',3:'train',5:'train',2:'bike',4:'bike'}; // 0=вс
 const DN = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-const TOTAL = document.querySelectorAll('.card:not([data-bike])').length;
+const TOTAL = document.querySelectorAll('.card:not([data-bike]):not([data-opt])').length; // гантели не обязательны
+function moves(){ return lget(MOVEKEY, {}); }
+// тип дня с учётом переносов: train | bike | moved (тренировку унесли на другой день) | ''
+function planOf(d){ const k = ymd(d), m = moves(); if(m[k]) return 'train'; for(const t in m) if(m[t]===k) return 'moved'; return PLAN[d.getDay()]||''; }
+function srcDay(d){ const m = moves()[ymd(d)]; return m ? new Date(m+'T00:00:00') : d; }
+function isLight(d){ return planOf(d)==='train' && (srcDay(d).getDay()===3 || !!lget(LIGHTKEY, {})[ymd(d)]); }
+function dname(k){ const d = new Date(k+'T00:00:00'); return DN[d.getDay()].toLowerCase()+' '+d.getDate(); }
+const VNA = {0:'в воскресенье',1:'в понедельник',2:'во вторник',3:'в среду',4:'в четверг',5:'в пятницу',6:'в субботу'};
+function dumbOn(){ return !!lget(DUMBKEY, false); }
 const BIKE_SHOW = [30,1,2,16,17,19]; // во вторник и четверг: разминка + растяжка
 const ORDER = [...document.querySelectorAll('.card')].map(c => +c.dataset.id); // исходный порядок карточек
 const WED = { // среда: самый тяжёлый день, подходов меньше
@@ -763,11 +823,12 @@ const WED = { // среда: самый тяжёлый день, подходо�
   12:'Облегчённый день: 2 раза по 15–20 секунд.',
   14:'Облегчённый день: 1–2 подхода по 8–10 раз.',
   21:'Облегчённый день: 1–2 подхода по 8–10 раз.',
+  25:'Облегчённый день: 1–2 подхода по 8 раз на каждую руку, вес тот же или меньше.',
   23:'Облегчённый день: 1–2 подхода по 10 раз.',
   24:'Облегчённый день: 1–2 подхода по 8 раз.'
 };
 let showAll = false;
-function needFor(d){ return PLAN[d.getDay()]==='bike' ? 5 : Math.ceil(TOTAL*NEED); }
+function needFor(d){ return planOf(d)==='bike' ? 5 : Math.ceil(TOTAL*NEED); }
 function isTrained(log, d){ return (log[ymd(d)]||0) >= needFor(d); }
 function sickStart(){ return lget(SKEY, null); }
 function isPaused(log, d){ const k=ymd(d), s=sickStart(); return log[k]===-1 || (s && k>=s && !isTrained(log,d)); }
@@ -782,11 +843,12 @@ function setSick(on){
   renderToday();
 }
 function applyDay(){
-  const dow = new Date().getDay(), bike = PLAN[dow]==='bike' && !showAll;
-  const isBikeDay = PLAN[dow]==='bike';
+  const now = new Date(), dow = now.getDay(), type = planOf(now), light = isLight(now);
+  const isBikeDay = type==='bike', bike = isBikeDay && !showAll;
   const c19=document.querySelector('.card[data-id="19"]'), c16=document.querySelector('.card[data-id="16"]'), c20=document.querySelector('.card[data-id="20"]');
   if(c19&&c16&&c20){ if(isBikeDay) c16.before(c19); else c20.before(c19); } // вт/чт: грушевидная сразу после дыхания
-  document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide', c.dataset.bike ? !isBikeDay : (bike && !BIKE_SHOW.includes(+c.dataset.id))));
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('hide',
+    c.dataset.bike ? PLAN[dow]!=='bike' : (c.dataset.id==='25' && !dumbOn()) || (bike && !BIKE_SHOW.includes(+c.dataset.id))));
   document.querySelectorAll('.group-title').forEach(t => {
     let n = t.nextElementSibling, any = false;
     while(n && !n.classList.contains('group-title')){ if(n.classList.contains('card') && !n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
@@ -798,28 +860,38 @@ function applyDay(){
     const row = [...c.querySelectorAll('.row')].find(r => r.textContent.trim().startsWith('Подходы'));
     if(!row) return;
     if(!row.dataset.orig) row.dataset.orig = row.innerHTML;
-    row.innerHTML = (dow===3 && WED[c.dataset.id]) ? '<b>Подходы:</b> '+WED[c.dataset.id] : row.dataset.orig;
+    row.innerHTML = (light && WED[c.dataset.id]) ? '<b>Подходы:</b> '+WED[c.dataset.id] : row.dataset.orig;
   });
+  let n = 0; // номера по порядку видимых карточек
+  document.querySelectorAll('.card:not(.hide) .num').forEach(x => { if(!isNaN(+x.textContent)) x.textContent = ++n; });
 }
 function toggleAll(){ showAll = !showAll; applyDay(); updateProgress(); renderToday(); }
 function markDay(k){
   const log = lget(LKEY, {}), d = new Date(k+'T00:00:00');
-  if(isTrained(log,d)) log[k] = -1; else if(log[k]===-1) delete log[k]; else log[k] = PLAN[d.getDay()]==='bike' ? 6 : TOTAL;
+  if(isTrained(log,d)) log[k] = -1; else if(log[k]===-1) delete log[k]; else log[k] = planOf(d)==='bike' ? 6 : TOTAL;
   lset(LKEY, log); renderToday();
 }
 let histOpen = false, planOpen = false;
 const DESC = {1:'Тренировка: весь комплекс, около часа',3:'Облегчённая тренировка: подходов меньше, около часа',5:'Тренировка: весь комплекс, около часа',2:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',4:'Велотренажёр 30–40 мин и короткий комплекс (5 упражнений, около 7 мин)',6:'Отдых',0:'Отдых'};
 let openDays = {};
+function descOf(d){
+  const t = planOf(d), m = moves(), k = ymd(d);
+  if(t==='moved'){ const to = Object.keys(m).find(x => m[x]===k); return 'Тренировка перенесена на '+dname(to); }
+  if(t==='train') return (isLight(d) ? 'Облегчённая тренировка: подходов меньше, около часа' : 'Тренировка: весь комплекс, около часа')+(m[k] ? ' (перенесена с '+dname(m[k])+')' : '');
+  return DESC[d.getDay()];
+}
 const REST_SHOW = [16,17,18,19,20];
-function dayCards(dow){
+function dayCards(d){
+  const dow = d.getDay(), type = planOf(d), light = isLight(d);
   const all = [...document.querySelectorAll('.card')].sort((a,b) => ORDER.indexOf(+a.dataset.id) - ORDER.indexOf(+b.dataset.id));
   let list;
-  if(PLAN[dow]==='bike'){
+  if(!dumbOn()) all.splice(all.findIndex(c => c.dataset.id==='25'), 1);
+  if(type==='bike'){
     list = all.filter(c => BIKE_SHOW.includes(+c.dataset.id));
     const i19 = list.findIndex(c => c.dataset.id==='19'), i16 = list.findIndex(c => c.dataset.id==='16');
     if(i19>-1 && i16>-1){ const x = list.splice(i19,1)[0]; list.splice(i16,0,x); }
   }
-  else if(PLAN[dow]==='train') list = all.filter(c => !c.dataset.bike);
+  else if(type==='train') list = all.filter(c => !c.dataset.bike);
   else list = all.filter(c => REST_SHOW.includes(+c.dataset.id));
   let n = 0, h = '';
   list.forEach(c => {
@@ -830,14 +902,14 @@ function dayCards(dow){
     const dm = k.querySelector('details.demo'); if(dm){ dm.removeAttribute('open'); dm.querySelector('.demo-box').innerHTML = ''; }
     const row = [...k.querySelectorAll('.row')].find(r => r.textContent.trim().startsWith('Подходы'));
     if(row && row.dataset.orig){ row.innerHTML = row.dataset.orig; }
-    if(row && dow===3 && WED[c.dataset.id]) row.innerHTML = '<b>Подходы:</b> '+WED[c.dataset.id];
+    if(row && light && WED[c.dataset.id]) row.innerHTML = '<b>Подходы:</b> '+WED[c.dataset.id];
     const num = k.querySelector('.num'); if(num && !isNaN(+num.textContent)) num.textContent = ++n;
     h += k.outerHTML;
   });
   return h;
 }
 function toggleDay(el){
-  if(el.open){ openDays[el.dataset.k] = 1; if(!el.querySelector('.plan-body')){ const d=new Date(el.dataset.k+'T00:00:00'); el.insertAdjacentHTML('beforeend','<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d.getDay())+'</div>'); } }
+  if(el.open){ openDays[el.dataset.k] = 1; if(!el.querySelector('.plan-body')){ const d=new Date(el.dataset.k+'T00:00:00'); el.insertAdjacentHTML('beforeend','<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d)+'</div>'); } }
   else delete openDays[el.dataset.k];
 }
 function planHtml(now){
@@ -845,9 +917,10 @@ function planHtml(now){
   for(let i=1;i<=7;i++){
     const d=new Date(now); d.setDate(d.getDate()+i); const k=ymd(d);
     const op = openDays[k];
-    if(!PLAN[d.getDay()]){ r += '<div class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span></div>'; continue; }
-    r += '<details class="plan-day" data-k="'+k+'"'+(op?' open':'')+' ontoggle="toggleDay(this)"><summary class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+DESC[d.getDay()]+'</span><i>›</i></summary>'+
-      (op ? '<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d.getDay())+'</div>' : '')+'</details>';
+    const tp = planOf(d);
+    if(!tp || tp==='moved'){ r += '<div class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+descOf(d)+'</span></div>'; continue; }
+    r += '<details class="plan-day" data-k="'+k+'"'+(op?' open':'')+' ontoggle="toggleDay(this)"><summary class="plan-row"><b>'+(i===1?'Завтра':DN[d.getDay()]+' '+d.getDate())+'</b><span>'+descOf(d)+'</span><i>›</i></summary>'+
+      (op ? '<div class="plan-body"><div class="plan-note">Просмотр: отметки появятся в этот день</div>'+dayCards(d)+'</div>' : '')+'</details>';
   }
   return '<details class="hist"'+(planOpen?' open':'')+' ontoggle="planOpen=this.open"><summary><span>📅 Что ждёт в ближайшие дни</span></summary>'+r+'</details>';
 }
@@ -920,6 +993,93 @@ document.addEventListener('DOMContentLoaded', function(){
   t.addEventListener('change', function(){ if(/^\d\d:\d\d$/.test(t.value)){ const o = remGet(); o.t = t.value; remSet(o); remSync(); } });
   remPaint();
 });
+function plural(n,a,b,c){ const m10=n%10, m100=n%100; return m10===1&&m100!==11 ? a : m10>=2&&m10<=4&&(m100<12||m100>14) ? b : c; }
+function escH(x){ return String(x==null?'':x).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]); }
+function refreshAll(){ applyDay(); updateProgress(); renderToday(); }
+function setLight(){ const m = lget(LIGHTKEY,{}), k = ymd(new Date()); if(m[k]) delete m[k]; else m[k] = 1; lset(LIGHTKEY, m); refreshAll(); }
+function moveTo(to, from){ const m = moves(); if(from) m[to] = from; else delete m[to]; lset(MOVEKEY, m); refreshAll(); }
+
+/* история: календарь на месяц */
+let histM = 0;
+function histNav(dl){ histM = Math.min(0, histM+dl); histOpen = true; renderToday(); }
+function recNum(n){ const x = String(n||'').replace(',','.'); let m = x.match(/(\d+)\s*[x×хХX*]\s*(\d+(?:\.\d+)?)/); if(m) return +m[1]*+m[2]; m = x.match(/\d+(?:\.\d+)?/); return m ? +m[0] : null; }
+function monthHtml(now, log){
+  const vm = new Date(now.getFullYear(), now.getMonth()+histM, 1), rec = lget(RECKEY,{}), tk = ymd(now);
+  const t = vm.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}).replace(' г.','');
+  let h = '<div class="mhead"><button type="button" class="mnav" onclick="histNav(-1)" aria-label="Предыдущий месяц">‹</button><b>'+t.charAt(0).toUpperCase()+t.slice(1)+'</b><button type="button" class="mnav" onclick="histNav(1)" aria-label="Следующий месяц"'+(histM>=0?' disabled':'')+'>›</button></div><div class="mgrid">';
+  ['пн','вт','ср','чт','пт','сб','вс'].forEach(x => h += '<div class="mwd">'+x+'</div>');
+  const lead = (vm.getDay()+6)%7, dim = new Date(vm.getFullYear(), vm.getMonth()+1, 0).getDate();
+  for(let i=0;i<lead;i++) h += '<div></div>';
+  let plan=0, done=0, light=0, pause=0, cardio=0, bikeMin=0, walkMin=0;
+  for(let d=1; d<=dim; d++){
+    const dt = new Date(vm.getFullYear(), vm.getMonth(), d), k = ymd(dt), tp = planOf(dt), fut = k>tk, isNow = k===tk;
+    const tr = isTrained(log,dt), ps = !tr && isPaused(log,dt), r30 = (rec[k]||{})['30'];
+    let mark = '';
+    if(!fut){
+      if(tp==='train'){ if(tr){ mark = '✓'; done++; if(isLight(dt)) light++; } if(!ps && (k<tk || tr)) plan++; }
+      if(ps){ mark = '🤒'; if(tp==='train') pause++; }
+      if(r30){ cardio++; const mn = recNum(r30.n)||0; if(r30.k==='walk') walkMin += mn; else bikeMin += mn; if(!mark) mark = r30.k==='walk' ? '🚶' : '🚴'; }
+      else if(tp==='bike' && tr){ cardio++; if(!mark) mark = '🚴'; }
+    }
+    if(tp==='moved' && !mark) mark = '↪';
+    const past = !fut && !isNow;
+    const cls = 'wd'+(tr?' ok':'')+(tp==='train'?' plan':'')+(isNow?' now':'')+(ps?' pz':'')+(past?' past':'')+(fut?' fut':'');
+    h += '<div class="'+cls+'"'+(past?' onclick="markDay(\''+k+'\')"':'')+' title="'+escH(descOf(dt))+'"><i><small>'+d+'</small>'+mark+'</i></div>';
+  }
+  h += '</div>';
+  const parts = ['Тренировок: <b>'+done+(plan>done ? ' из '+plan : '')+'</b>'];
+  if(light) parts.push('облегчённых '+light);
+  if(cardio) parts.push('кардио '+cardio+' '+plural(cardio,'день','дня','дней'));
+  if(bikeMin) parts.push('велик '+bikeMin+' мин');
+  if(walkMin) parts.push('прогулки '+walkMin+' мин');
+  if(pause) parts.push('пауз '+pause);
+  return h + '<div class="stat">'+parts.join(' · ')+'</div><div class="stat">✓ тренировка · 🚴 велик · 🚶 прогулка · 🤒 пауза · ↪ перенесена. Бирюзовая рамка - день тренировки по плану.</div>';
+}
+
+/* что сделала: повторы, резинка, вес, минуты */
+const REC_IDS = ['30','4','6','8','10','12','14','21','23','24','25'], BAND = ['6','10','23'];
+const BANDS = ['самая лёгкая','лёгкая','средняя','тугая','самая тугая','отрезанная'];
+function recPh(id){ return id==='30' ? 'минут' : id==='12' ? '2×20 сек' : '2×12'; }
+function recTxt(r){ return [r.n, r.kg ? r.kg+' кг' : '', r.b, r.k==='walk' ? 'прогулка' : ''].filter(Boolean).join(', '); }
+function spark(vals){
+  if(vals.length < 2) return '';
+  const mx = Math.max(...vals), mn = Math.min(...vals), w = 90, h = 24;
+  const pts = vals.map((v,i) => (i*(w-6)/(vals.length-1)+3).toFixed(1)+','+(mx===mn ? h/2 : h-4-(v-mn)/(mx-mn)*(h-8)).toFixed(1)).join(' ');
+  return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" aria-label="Как менялось"><polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
+function recPaint(card){
+  const id = card.dataset.id, tk = ymd(new Date()), rec = lget(RECKEY,{}), cur = (rec[tk]||{})[id] || {};
+  const prev = Object.keys(rec).filter(k => k < tk && rec[k][id] && (rec[k][id].n || rec[k][id].kg)).sort();
+  const last = prev.length ? rec[prev[prev.length-1]][id] : null;
+  let box = card.querySelector('.rec');
+  if(!box){ box = document.createElement('div'); box.className = 'rec'; card.querySelector('.card-body').appendChild(box); }
+  const lastB = cur.b || (last && last.b) || '';
+  let h = '<div class="rec-row"><span class="rec-l">Сегодня сделала</span><input class="rec-n" data-f="n" value="'+escH(cur.n)+'" placeholder="'+escH(last && last.n ? last.n : recPh(id))+'">';
+  if(id==='30') h += '<select data-f="k"><option value="bike"'+(cur.k!=='walk'?' selected':'')+'>велик</option><option value="walk"'+(cur.k==='walk'?' selected':'')+'>прогулка</option></select>';
+  if(id==='25') h += '<input class="rec-kg" data-f="kg" inputmode="decimal" value="'+escH(cur.kg)+'" placeholder="'+escH(last && last.kg ? last.kg : '0')+'"><span class="rec-u">кг</span>';
+  if(BAND.includes(id)) h += '<select data-f="b"><option value="">резинка</option>'+BANDS.map(b => '<option'+(b===lastB?' selected':'')+'>'+b+'</option>').join('')+'</select>';
+  h += '</div>';
+  const hist = prev.slice(-3).map(k => '<span>'+k.slice(8)+'.'+k.slice(5,7)+': '+escH(recTxt(rec[k][id]))+'</span>').join('');
+  const vals = prev.slice(-7).concat(cur.n ? [tk] : []).map(k => { const r = rec[k][id], n = recNum(r.n); if(n==null) return null; const kg = parseFloat(String(r.kg||'').replace(',','.')); return kg ? n*kg : n; }).filter(v => v!=null);
+  if(hist || vals.length > 1) h += '<div class="rec-h">'+spark(vals)+'<div class="rec-list">'+(hist ? 'Раньше: '+hist : '')+'</div></div>';
+  else h += '<div class="rec-h"><div class="rec-list">Пиши, сколько сделала (например "2×12"), и здесь появится, как растёт результат.</div></div>';
+  box.innerHTML = h;
+}
+document.addEventListener('change', e => {
+  const box = e.target.closest && e.target.closest('.rec'); if(!box) return;
+  const card = box.closest('.card'), id = card.dataset.id, tk = ymd(new Date()), rec = lget(RECKEY,{});
+  const o = {}; box.querySelectorAll('[data-f]').forEach(x => { const v = x.value.trim(); if(v) o[x.dataset.f] = v; });
+  const has = !!(o.n || o.kg || (id==='30' && e.target.dataset.f==='k'));
+  rec[tk] = rec[tk] || {};
+  if(has || (id==='30' && card.classList.contains('done'))) rec[tk][id] = o; else delete rec[tk][id];
+  if(!Object.keys(rec[tk]).length) delete rec[tk];
+  lset(RECKEY, rec);
+  if(has && !card.classList.contains('done')) toggleCard(card.querySelector('.card-head'));
+  else renderToday();
+  recPaint(card);
+});
+document.addEventListener('keydown', e => { if(e.key==='Enter' && e.target.closest && e.target.closest('.rec') && e.target.tagName==='INPUT') e.target.blur(); });
+
 function renderToday(){
   try{ remSync(); }catch(e){}
   const el = document.getElementById('today'); if(!el) return;
@@ -927,10 +1087,13 @@ function renderToday(){
   const need = needFor(now);
   const doneN = document.querySelectorAll('.card.done:not(.hide)').length;
   let msg;
-  if(dow===3) msg = '<b>Сегодня облегчённая тренировка.</b> Подходов меньше, чем в Пн и Пт: это самый нагруженный день.';
-  else if(PLAN[dow]==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
-  else if(PLAN[dow]==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. Если нет сил, можно вместо него спокойно прогуляться. Отметь его в списке. После него короткий комплекс: разминка и 3 растяжки, около 7 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
+  const type = planOf(now), light = isLight(now), mv = moves()[ymd(now)];
+  if(type==='train' && light) msg = '<b>Сегодня облегчённая тренировка.</b> '+(dow===3 && !mv ? 'Подходов меньше, чем в Пн и Пт: это самый нагруженный день.' : 'Подходов меньше, чем обычно.');
+  else if(type==='train') msg = '<b>Сегодня тренировка.</b> Весь комплекс, около часа.';
+  else if(type==='moved') msg = '<b>Тренировка перенесена</b> '+descOf(now).replace('Тренировка перенесена ','')+'. Сегодня можно отдохнуть.';
+  else if(type==='bike') msg = '<b>Сегодня велотренажёр</b> 30–40 минут. Если нет сил, можно вместо него спокойно прогуляться. Отметь его в списке. После него короткий комплекс: разминка и 3 растяжки, около 7 минут. <button type="button" class="linkbtn" onclick="toggleAll()">'+(showAll?'Показать только короткий':'Показать весь комплекс')+'</button>';
   else msg = '<b>Сегодня отдых.</b> Можно сделать растяжку, если хочется.';
+  if(type==='train' && mv) msg += ' Это тренировка за '+dname(mv)+'.'+(PLAN[dow]==='bike' ? ' Велик сегодня по желанию.' : '');
   const sick = !!sickStart();
   if(sick) msg = '<b>Пауза: ты болеешь.</b> Отдыхай, серия сохранена, пропуски не считаются. При температуре и слабости не тренируйся. Когда станет лучше, нажми «Я выздоровела».';
   // неделя Пн..Вс
@@ -942,7 +1105,7 @@ function renderToday(){
     for(let i=0;i<7;i++){
       const d = new Date(mon); d.setDate(mon.getDate()+i);
       const wdow = d.getDay(), t = isTrained(log,d), ps = !t && isPaused(log,d);
-      if(w===0 && t && PLAN[wdow]==='train') weekN++;
+      if(w===0 && t && planOf(d)==='train') weekN++;
       const isNow = ymd(d)===ymd(now), past = d < mon0 || (w===0 && !isNow && d < now);
       const cls = 'wd' + (t?' ok':'') + (PLAN[wdow]==='train'?' plan':'') + (isNow?' now':'') + (past?' past':'') + (ps?' pz':'');
       const mark = t ? '✓' : ps ? '🤒' : (PLAN[wdow]==='bike' ? '🚴' : '');
@@ -954,18 +1117,18 @@ function renderToday(){
   let streak=0;
   for(let i=0;i<120;i++){
     const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
-    if(PLAN[d.getDay()]!=='train') continue;
+    if(planOf(d)!=='train') continue;
     if(isPaused(log,d) && !isTrained(log,d)) continue;
     if(isTrained(log,d)) streak++; else if(i===0) continue; else break;
   }
-  const allN = Object.keys(log).filter(k => { const d=new Date(k+'T00:00:00'); return PLAN[d.getDay()]==='train' && log[k] >= needFor(d); }).length;
+  const allN = Object.keys(log).filter(k => { const d=new Date(k+'T00:00:00'); return planOf(d)==='train' && log[k] >= needFor(d); }).length;
   // лучшая серия за всё время
   let best=0, run=0;
   const keys = Object.keys(log).sort();
   if(keys.length){
     const t0 = new Date(keys[0]+'T00:00:00'), t1 = new Date(now); t1.setHours(0,0,0,0);
     for(let d=new Date(t0); d<=t1; d.setDate(d.getDate()+1)){
-      if(PLAN[d.getDay()]!=='train') continue;
+      if(planOf(d)!=='train') continue;
       if(isPaused(log,d) && !isTrained(log,d)) continue;
       if(isTrained(log,d)) { run++; if(run>best) best=run; }
       else if(ymd(d)!==ymd(t1)) run=0;
@@ -1009,7 +1172,7 @@ function renderToday(){
     let missed = false;
     for(let i=0;i<180;i++){
       const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
-      if(PLAN[d.getDay()]!=='train') continue;
+      if(planOf(d)!=='train') continue;
       if(isPaused(log,d) && !isTrained(log,d)) continue;
       if(isTrained(log,d)){ if(missed) lost++; }
       else if(i===0) continue;
@@ -1020,7 +1183,7 @@ function renderToday(){
   Object.keys(log).forEach(k => { const d=new Date(k+'T00:00:00'); if(log[k] >= needFor(d) && (!lastT || k>lastT)) lastT = k; });
   const gap = lastT ? Math.round((new Date(ymd(now)+'T00:00:00') - new Date(lastT+'T00:00:00'))/86400000) : 0;
   let nextT = '';
-  for(let j=1;j<=7 && !nextT;j++){ const d=new Date(now); d.setDate(d.getDate()+j); if(PLAN[d.getDay()]==='train') nextT = {1:'в понедельник',3:'в среду',5:'в пятницу'}[d.getDay()]; }
+  for(let j=1;j<=7 && !nextT;j++){ const d=new Date(now); d.setDate(d.getDate()+j); if(planOf(d)==='train') nextT = VNA[d.getDay()]; }
   const earned = BD.filter(b => b.v>=b.need);
   let cs = lget(CKEY, null);
   if(!cs){ cs = {n:earned.length, day:'', name:''}; lset(CKEY, cs); }
@@ -1035,7 +1198,7 @@ function renderToday(){
   else if(streak>prevS){ jump = true; lset(STKEY, streak); }
   const cheer = (typeof COACH!=='undefined') ? COACH.html({
     jump: jump && !sick,
-    day: ymd(now), sick: sick, trainedToday: trainedToday, planToday: PLAN[dow]||'',
+    day: ymd(now), sick: sick, trainedToday: trainedToday, planToday: type==='moved' ? '' : type,
     streak: streak, best: best, allN: allN,
     back: !!backNow || (trainedToday && backD && backD===ymd(now)),
     broken: !sick && !trainedToday && allN>0 && streak===0,
@@ -1044,14 +1207,28 @@ function renderToday(){
     newBadge: (trainedToday && cs.day===ymd(now)) ? cs.name : '',
     state: sick ? 's' : trainedToday ? 't' : 'n'
   }) : '';
+  let dayBtns = '';
+  if(!sick){
+    const tk = ymd(now), tm = new Date(now); tm.setDate(tm.getDate()+1);
+    if(type==='train' && !trainedToday){
+      if(!(dow===3 && !mv) || lget(LIGHTKEY,{})[tk]) dayBtns += '<button type="button" class="greybtn" onclick="setLight()">'+(lget(LIGHTKEY,{})[tk] ? 'Вернуть обычную тренировку' : '😮‍💨 Сегодня облегчённо')+'</button> ';
+      if(!mv && planOf(tm)!=='train') dayBtns += '<button type="button" class="greybtn" onclick="moveTo(\''+ymd(tm)+'\',\''+tk+'\')">↪ Перенести на завтра</button> ';
+    }
+    if(type!=='train' && type!=='moved'){
+      for(let i=1;i<=2;i++){ const d = new Date(now); d.setDate(d.getDate()-i);
+        if(planOf(d)==='train' && !isTrained(log,d) && !isPaused(log,d)){ dayBtns += '<button type="button" class="greybtn" onclick="moveTo(\''+tk+'\',\''+ymd(d)+'\')">↪ Сделать сегодня тренировку за '+dname(ymd(d))+'</button> '; break; } }
+    }
+    if(mv) dayBtns += '<button type="button" class="greybtn" onclick="moveTo(\''+tk+'\',null)">Отменить перенос</button> ';
+    if(type==='moved'){ const m = moves(), to = Object.keys(m).find(x => m[x]===tk); dayBtns += '<button type="button" class="greybtn" onclick="moveTo(\''+to+'\',null)">Отменить перенос</button> '; }
+  }
   const sickBtn = sick
     ? '<button type="button" class="greybtn" onclick="setSick(false)">Я выздоровела, возвращаюсь</button><div class="stat">После болезни первую неделю делай примерно половину подходов и сразу бросай при слабости, головокружении или боли.</div>'
     : '<button type="button" class="greybtn" onclick="setSick(true)">🤒 Я заболела / нужна пауза</button>';
-  el.innerHTML = cheer + msg + '<div>'+sickBtn+'</div>' +
+  el.innerHTML = cheer + msg + (dayBtns ? '<div>'+dayBtns+'</div>' : '') + '<div>'+sickBtn+'</div>' +
     '<div class="stat">На этой неделе: '+weekN+' из 3 · серия: '+streak+' · всего: '+allN+
     (doneN>0 && doneN<need ? ' · до зачёта сегодня ещё '+(need-doneN) : '')+'</div>' +
-    planHtml(now) + '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary><span>🏆 История и награды'+(nextB?'<br><small style="font-weight:400;opacity:.8">следующая: '+nextB.i+' '+nextB.n+'</small>':'')+'</span></summary>'+cells+
-    '<div class="stat">Прошедший день можно отметить вручную: нажми на него (✓ → 🤒 пауза → пусто). Пауза не рвёт серию.</div>'+badges+'</details>';
+    planHtml(now) + '<details class="hist"'+(histOpen?' open':'')+' ontoggle="histOpen=this.open"><summary><span>🏆 История и награды'+(nextB?'<br><small style="font-weight:400;opacity:.8">следующая: '+nextB.i+' '+nextB.n+'</small>':'')+'</span></summary>'+monthHtml(now, log)+
+    '<div class="stat">Прошедший день можно отметить вручную: нажми на него (✓ → 🤒 пауза → пусто). Пауза и перенос не рвут серию.</div>'+badges+'</details>';
 }
 document.querySelectorAll('.card-head').forEach(h => {
   h.setAttribute('role','button'); h.setAttribute('tabindex','0');
@@ -1070,6 +1247,8 @@ load().forEach(id => {
   const card = document.querySelector('.card[data-id="'+id+'"]');
   if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
 });
+try{ const db = document.getElementById('dumb-on'); db.checked = dumbOn(); db.addEventListener('change', () => { lset(DUMBKEY, db.checked); refreshAll(); }); }catch(e){}
+REC_IDS.forEach(id => { const c = document.querySelector('.card[data-id="'+id+'"]'); if(c) recPaint(c); });
 applyDay();
 updateProgress();
 renderToday();
