@@ -314,6 +314,11 @@
   .rec-counter-label{display:block;margin-bottom:4px}
   .rec-stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;text-align:center;background:var(--bg);border-radius:10px;box-shadow:inset 0 0 0 1px var(--card-border)}
   .rec-number{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums}
+  .rec-value{position:relative;display:grid;place-items:center;min-width:0;height:44px}
+  .rec-stepper input.rec-value-input{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:0;background:transparent;color:transparent;text-align:center;font-size:19px;font-weight:650;font-variant-numeric:tabular-nums}
+  .rec-stepper input.rec-value-input:focus{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
+  .rec-value:focus-within .rec-number{visibility:hidden}
+  .rec-stepper[hidden],.rec-mixed[hidden]{display:none}
   .rec-stepper button,.rec-equal{background:var(--accent-soft);color:var(--accent);border:0;border-radius:9px;min-height:44px;font:inherit;cursor:pointer;touch-action:manipulation}
   .rec-stepper button{padding:0;font-size:22px;line-height:1}
   .rec-stepper button[aria-disabled="true"]{opacity:.45;cursor:default}
@@ -332,7 +337,8 @@
   .rec-set-timed{grid-template-columns:1fr 132px 36px}
   .rec-set-timed .rec-u{text-align:right}
   .rec-equal{justify-self:start;padding:0 10px;font-size:13px}
-  @media(max-width:340px){.rec-number{font-size:17px}}
+  .rec-details .rec-equal{margin-top:6px}
+  @media(max-width:340px){.rec-number,.rec-stepper input.rec-value-input{font-size:17px}}
   .rec-number-clock{font-size:12px}
   .rec-h{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-dim)}
   .rec-h[hidden]{display:none}
@@ -1143,12 +1149,31 @@ function recPaintHistory(box, id, rec, today, prev){
   history.innerHTML = spark(vals)+(hist ? '<div class="rec-list">Раньше: '+hist+'</div>' : '');
   history.hidden = !history.innerHTML;
 }
-function recStepper(action, label, value, max, index, amount = value){
+function recPaintStepper(container, action, label, value, max, index, amount = value){
   const attrs = ' data-rec-action="'+action+'"'+(index==null ? '' : ' data-set="'+index+'"');
-  return '<div class="rec-stepper" role="group" aria-label="'+label+'">'+
-    '<button type="button"'+attrs+' data-delta="-1" aria-label="Уменьшить: '+label+'" aria-disabled="'+(value===0)+'">−</button>'+
-    '<span class="rec-number'+(typeof amount==='string' ? ' rec-number-clock' : '')+'">'+amount+'</span>'+
-    '<button type="button"'+attrs+' data-delta="1" aria-label="Увеличить: '+label+'" aria-disabled="'+(value===max)+'">+</button></div>';
+  let stepper = container.querySelector('.rec-stepper');
+  if(!stepper){
+    container.insertAdjacentHTML('beforeend','<div class="rec-stepper" role="group">'+
+      '<button type="button"'+attrs+' data-delta="-1">−</button>'+
+      '<span class="rec-value"><span class="rec-number" aria-hidden="true"></span><input type="text" class="rec-value-input"'+attrs+
+      ' inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false"></span>'+
+      '<button type="button"'+attrs+' data-delta="1">+</button></div>');
+    stepper = container.lastElementChild;
+  }
+  const [minus, center, plus] = stepper.children, [number, input] = center.children;
+  const clock = typeof amount==='string';
+  stepper.setAttribute('aria-label',label);
+  minus.setAttribute('aria-label','Уменьшить: '+label);
+  plus.setAttribute('aria-label','Увеличить: '+label);
+  minus.setAttribute('aria-disabled',String(value===0));
+  plus.setAttribute('aria-disabled',String(value===max));
+  input.setAttribute('aria-label','Изменить: '+label+(clock ? ' (ввод целых минут)' : ''));
+  number.classList.toggle('rec-number-clock',clock);
+  number.textContent = amount;
+  input.defaultValue = String(amount);
+  // Сохраняем черновик и фокус при обновлении соседних счётчиков.
+  if(input!==document.activeElement) input.value = input.defaultValue;
+  return stepper;
 }
 function recPaintCounters(box, entry, unit){
   const focus = document.activeElement, details = box.querySelector('.rec-details');
@@ -1161,11 +1186,11 @@ function recPaintCounters(box, entry, unit){
   const mixed = !WorkoutReps.uniform(sets), n = sets.length, total = WorkoutReps.total(sets);
   const max = WorkoutReps.maximum(unit), label = timed ? unit==='sec' ? 'Секунд' : 'Минут' : 'Повторений';
   const amount = recAmount(reps,unit);
-  counters.innerHTML =
-    '<div><span class="rec-l rec-counter-label">Подходов</span>'+recStepper('count','Подходы',n,WorkoutReps.maxSets)+'</div>'+
-    '<div><span class="rec-l rec-counter-label">'+(typeof amount==='string' && !mixed ? 'Мин:сек' : label)+'</span>'+
-      (mixed ? '<span class="rec-mixed">Разные</span>' :
-      recStepper('reps',timed ? label+' в каждом подходе' : 'Повторения в каждом подходе',reps,max,null,amount))+'</div>';
+  const [countField, amountField] = counters.children;
+  recPaintStepper(countField,'count','Подходы',n,WorkoutReps.maxSets);
+  amountField.querySelector('.rec-counter-label').textContent = typeof amount==='string' && !mixed ? 'Мин:сек' : label;
+  amountField.querySelector('.rec-mixed').hidden = !mixed;
+  recPaintStepper(amountField,'reps',timed ? label+' в каждом подходе' : 'Повторения в каждом подходе',reps,max,null,amount).hidden = mixed;
   const setLabel = n+' '+plural(n,'подход','подхода','подходов');
   const totalLabel = timed ? recTime(total,unit) : total+' '+plural(total,'повторение','повторения','повторений');
   let summary = 'Результат ещё не внесён';
@@ -1174,27 +1199,32 @@ function recPaintCounters(box, entry, unit){
   else if(!result && entry.n) summary = 'Сегодня: '+escH(entry.n);
   if(entry.legacyN) summary += '<br>Исходная запись: '+escH(entry.legacyN);
   box.querySelector('.rec-total').innerHTML = summary;
-  details.querySelector('.rec-sets').innerHTML = sets.map((value, i) => {
+  const rows = details.querySelector('.rec-sets'), equal = details.querySelector('.rec-equal');
+  while(rows.children.length>n) rows.lastElementChild.remove();
+  sets.forEach((value, i) => {
     const label = 'Подход '+(i+1);
     const amount = recAmount(value,unit);
     const suffix = unit==='sec' ? 'сек' : typeof amount==='string' ? 'м:с' : 'мин';
-    return '<div class="rec-set'+(timed ? ' rec-set-timed' : '')+'"><span>'+label+'</span>'+
-      recStepper('set',timed ? label+', '+suffix : label,value,max,i,amount)+(timed ? '<span class="rec-u" aria-hidden="true">'+suffix+'</span>' : '')+'</div>';
-  }).join('')+(mixed ? '<button type="button" class="rec-equal" data-rec-action="equal">Сделать одинаковыми (по '+(timed ? recTime(sets[0],unit) : sets[0])+')</button>' : '');
+    if(!rows.children[i]) rows.insertAdjacentHTML('beforeend','<div class="rec-set'+(timed ? ' rec-set-timed' : '')+'"><span>'+label+'</span><div></div>'+
+      (timed ? '<span class="rec-u" aria-hidden="true"></span>' : '')+'</div>');
+    const row = rows.children[i];
+    recPaintStepper(row.children[1],'set',timed ? label+', '+suffix : label,value,max,i,amount);
+    if(timed) row.lastElementChild.textContent = suffix;
+  });
+  equal.hidden = !mixed;
+  if(mixed) equal.textContent = 'Сделать одинаковыми (по '+(timed ? recTime(sets[0],unit) : sets[0])+')';
   if(focus && focus===replace && replace.hidden) counters.querySelector('[data-delta="1"]').focus({preventScroll:true});
-  else if(focus?.dataset.recAction && !focus.isConnected){
-    const next = [...box.querySelectorAll('[data-rec-action]')].find(button =>
-      button.dataset.recAction===focus.dataset.recAction && button.dataset.set===focus.dataset.set && button.dataset.delta===focus.dataset.delta);
-    (next || details.querySelector('summary')).focus({preventScroll:true});
-  }
+  else if(focus===equal && equal.hidden) details.querySelector('summary').focus({preventScroll:true});
 }
 function recPaint(card){
   const id = card.dataset.id, unit = REC_UNITS[id], today = ymd(new Date()), rec = lget(RECKEY,{}), cur = rec[today]?.[id] || {};
   const prev = recHistory(id, rec, today), last = rec[prev[prev.length-1]]?.[id];
   let box = card.querySelector('.rec');
   if(!box){ box = document.createElement('div'); box.className = 'rec'; card.querySelector('.card-body').appendChild(box); }
-  let h = '<div><div class="rec-counters"></div><div class="rec-total" role="status"></div></div>'+
-    '<details class="rec-details"><summary>'+(unit==='reps' ? 'Повторения' : 'Время')+' по подходам</summary><div class="rec-sets"></div></details>';
+  let h = '<div><div class="rec-counters"><div><span class="rec-l rec-counter-label">Подходов</span></div>'+
+    '<div><span class="rec-l rec-counter-label"></span><span class="rec-mixed" hidden>Разные</span></div></div><div class="rec-total" role="status"></div></div>'+
+    '<details class="rec-details"><summary>'+(unit==='reps' ? 'Повторения' : 'Время')+' по подходам</summary><div class="rec-sets"></div>'+
+    '<button type="button" class="rec-equal" data-rec-action="equal" hidden></button></details>';
   if(unit!=='reps') h += '<button type="button" class="rec-equal" data-rec-action="replace" hidden>Ввести длительность</button>';
   const lastB = cur.b ?? last?.b ?? '';
   const extras = id==='30' || id==='25' || BAND.includes(id);
@@ -1218,13 +1248,10 @@ function updateRecord(card, edit){
   recPaintHistory(box, id, rec, today, recHistory(id, rec, today));
   return entry;
 }
-document.addEventListener('click', e => {
-  const button = e.target.closest('[data-rec-action]');
-  if(!button || button.getAttribute('aria-disabled')==='true') return;
-  const box = button.closest('.rec'), card = box.closest('.card');
+function applyRecAction(box, recAction, set, delta, value){
+  const card = box.closest('.card');
   const id = card.dataset.id, unit = REC_UNITS[id], max = WorkoutReps.maximum(unit);
-  const {recAction, delta, set} = button.dataset;
-  const change = Number(delta)*WorkoutReps.factor(unit);
+  const change = delta*WorkoutReps.factor(unit);
   let doneChange;
   const updated = updateRecord(card, entry => {
     const result = WorkoutReps.read(entry.n,unit);
@@ -1234,17 +1261,22 @@ document.addEventListener('click', e => {
       if(unit==='reps' || !entry.n || result) return false;
       entry.legacyN = entry.n;
     } else if(recAction==='count'){
-      if(Number(delta)>0 && sets.length<WorkoutReps.maxSets) sets.push(sets.at(-1) ?? reps);
-      else if(Number(delta)<0 && sets.length) sets.pop();
-      else return false;
+      const count = value ?? sets.length+delta;
+      if(count===sets.length || count<0 || count>WorkoutReps.maxSets) return false;
+      const addedValue = sets.at(-1) ?? reps;
+      if(count<sets.length) sets.length = count;
+      else while(sets.length<count) sets.push(addedValue);
     } else if(recAction==='set'){
       if(sets[set]==null) return false;
-      sets[set] = Math.max(0, Math.min(max, sets[set]+change));
+      const nextValue = value ?? Math.max(0, Math.min(max, sets[set]+change));
+      if(nextValue===sets[set]) return false;
+      sets[set] = nextValue;
     } else if(recAction==='equal'){
       sets.fill(sets[0]);
     } else {
       if(!WorkoutReps.uniform(sets)) return false;
-      next = Math.max(0, Math.min(max, reps+change));
+      next = value ?? Math.max(0, Math.min(max, reps+change));
+      if(next===reps) return false;
       sets.fill(next);
     }
     if(id==='30' && !entry.n && card.classList.contains('done')) entry.marked = true;
@@ -1270,6 +1302,42 @@ document.addEventListener('click', e => {
     updateProgress(); save();
   }
   if(doneChange!=null || id==='30') renderToday();
+}
+document.addEventListener('click', e => {
+  const target = e.target;
+  if(target.matches('.rec-value-input')){
+    const value = target.value;
+    target.select();
+    // WebKit может поставить курсор после обработки касания.
+    requestAnimationFrame(() => {
+      if(document.activeElement===target && target.value===value) target.select();
+    });
+    return;
+  }
+  const button = target.closest('button[data-rec-action]');
+  if(!button) return;
+  const focused = document.activeElement;
+  if(focused?.matches('.rec-value-input')) focused.blur();
+  if(!button.isConnected || button.getAttribute('aria-disabled')==='true') return;
+  const {recAction, delta, set} = button.dataset;
+  applyRecAction(button.closest('.rec'), recAction, set, Number(delta));
+});
+document.addEventListener('focusin', e => {
+  if(e.target.matches('.rec-value-input')) e.target.select();
+});
+document.addEventListener('focusout', e => {
+  const input = e.target;
+  if(!input.matches('.rec-value-input')) return;
+  const text = input.value.trim();
+  input.value = input.defaultValue;
+  const box = input.closest('.rec');
+  if(!box || !/^\d+$/.test(text) || text===input.defaultValue) return;
+  const {recAction, set} = input.dataset;
+  const unit = REC_UNITS[box.closest('.card').dataset.id];
+  const scale = recAction==='count' ? 1 : WorkoutReps.factor(unit);
+  const max = recAction==='count' ? WorkoutReps.maxSets : WorkoutReps.maximum(unit);
+  const value = Number(text)*scale;
+  if(value<=max) applyRecAction(box, recAction, set, 0, value);
 });
 document.addEventListener('input', e => {
   if(!e.target.matches('.rec-kg')) return;
@@ -1302,7 +1370,14 @@ document.addEventListener('change', e => {
   }
   if(e.target.dataset.f==='kg') e.target.value = rec[tk]?.[id]?.kg || '';
 });
-document.addEventListener('keydown', e => { if(e.key==='Enter' && e.target.closest && e.target.closest('.rec') && e.target.tagName==='INPUT') e.target.blur(); });
+document.addEventListener('keydown', e => {
+  const input = e.target;
+  if(e.isComposing || input.tagName!=='INPUT' || !input.closest('.rec')) return;
+  if(e.key==='Escape' && input.matches('.rec-value-input')) input.value = input.defaultValue;
+  else if(e.key!=='Enter') return;
+  e.preventDefault();
+  input.blur();
+});
 
 function renderToday(){
   try{ remSync(); }catch(e){}
