@@ -308,7 +308,7 @@
   .rec-l{font-size:13px;color:var(--text-dim)}
   .rec input,.rec select{background:var(--bg);color:var(--text);border:1px solid var(--card-border);border-radius:10px;padding:7px 10px;font:inherit;font-size:14px;min-width:0}
   .rec input:focus,.rec select:focus{outline:none;border-color:var(--accent)}
-  .rec-n{width:96px}.rec-kg{width:62px}
+  .rec-kg{width:62px}
   .rec-u{font-size:13px;color:var(--text-dim)}
   .rec-counters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:8px}
   .rec-counter-label{display:block;margin-bottom:4px}
@@ -329,10 +329,14 @@
   .rec-details[open] summary::after{transform:rotate(225deg)}
   .rec-sets{display:grid;gap:6px}
   .rec-set{display:grid;grid-template-columns:1fr 132px;gap:8px;align-items:center;font-size:13px}
+  .rec-set-timed{grid-template-columns:1fr 132px 36px}
+  .rec-set-timed .rec-u{text-align:right}
   .rec-equal{justify-self:start;padding:0 10px;font-size:13px}
   @media(max-width:340px){.rec-number{font-size:17px}}
+  .rec-number-clock{font-size:12px}
   .rec-h{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-dim)}
   .rec-h[hidden]{display:none}
+  .rec-counters[hidden]{display:none}
   .rec-list{flex:1;min-width:0}
   .rec-list span{display:inline-block;margin-right:10px;overflow-wrap:anywhere;max-width:100%}
   .card-body>*{min-width:0}
@@ -735,7 +739,7 @@
 <script src="coach.js"></script>
 <script src="tgbk.js"></script>
 <script src="ydsync.js"></script>
-<script src="reps.js"></script>
+<script src="reps.js?v=26"></script>
 <script>
 // отметки хранятся отдельно на каждый день: так синхронизация с Диском не притащит вчерашние галочки в сегодня
 const DONEP = 'back-routine-done-';
@@ -767,8 +771,13 @@ function save(manualIds = []){
     const entry = rec[dk]?.[id];
     if(entry?.autoDone){ delete entry.autoDone; changed = true; }
   });
-  if(ids.includes('30')){ if(!r30){ rec[dk] = rec[dk]||{}; rec[dk]['30'] = {k:'bike'}; changed = true; } }
-  else if(r30 && !r30.n){ delete rec[dk]['30']; if(!Object.keys(rec[dk]).length) delete rec[dk]; changed = true; }
+  if(ids.includes('30')){
+    if(!r30){ rec[dk] = rec[dk]||{}; rec[dk]['30'] = {k:'bike'}; changed = true; }
+    else if(r30.n && manualIds.includes('30') && !r30.marked){ r30.marked = true; changed = true; }
+  } else if(r30){
+    if(!r30.n){ delete rec[dk]['30']; if(!Object.keys(rec[dk]).length) delete rec[dk]; changed = true; }
+    else if(r30.marked){ delete r30.marked; changed = true; }
+  }
   if(changed) lset(RECKEY, rec);
 }
 function setCardDone(card, done){
@@ -1041,7 +1050,7 @@ function monthHtml(now, log){
   ['пн','вт','ср','чт','пт','сб','вс'].forEach(x => h += '<div class="mwd">'+x+'</div>');
   const lead = (vm.getDay()+6)%7, dim = new Date(vm.getFullYear(), vm.getMonth()+1, 0).getDate();
   for(let i=0;i<lead;i++) h += '<div></div>';
-  let plan=0, done=0, light=0, pause=0, cardio=0, bikeMin=0, walkMin=0;
+  let plan=0, done=0, light=0, pause=0, cardio=0, bikeSec=0, walkSec=0;
   for(let d=1; d<=dim; d++){
     const dt = new Date(vm.getFullYear(), vm.getMonth(), d), k = ymd(dt), tp = planOf(dt), fut = k>tk, isNow = k===tk;
     const tr = isTrained(log,dt), ps = !tr && isPaused(log,dt), r30 = (rec[k]||{})['30'];
@@ -1049,8 +1058,13 @@ function monthHtml(now, log){
     if(!fut){
       if(tp==='train'){ if(tr){ mark = '✓'; done++; if(isLight(dt)) light++; } if(!ps && (k<tk || tr)) plan++; }
       if(ps){ mark = '🤒'; if(tp==='train') pause++; }
-      if(r30){ cardio++; const mn = recNum(r30.n)||0; if(r30.k==='walk') walkMin += mn; else bikeMin += mn; if(!mark) mark = r30.k==='walk' ? '🚶' : '🚴'; }
-      else if(tp==='bike' && tr){ cardio++; if(!mark) mark = '🚴'; }
+      if(r30 && (recHasResult('30',r30) || r30.marked || (!r30.n && r30.k))){
+        cardio++;
+        const seconds = Math.round((recValue('30',r30)||0)*60);
+        if(r30.k==='walk') walkSec += seconds; else bikeSec += seconds;
+        if(!mark) mark = r30.k==='walk' ? '🚶' : '🚴';
+      }
+      else if(!r30 && tp==='bike' && tr){ cardio++; if(!mark) mark = '🚴'; }
     }
     if(tp==='moved' && !mark) mark = '↪';
     const past = !fut && !isNow;
@@ -1061,24 +1075,46 @@ function monthHtml(now, log){
   const parts = ['Тренировок: <b>'+done+(plan>done ? ' из '+plan : '')+'</b>'];
   if(light) parts.push('облегчённых '+light);
   if(cardio) parts.push('кардио '+cardio+' '+plural(cardio,'день','дня','дней'));
-  if(bikeMin) parts.push('велик '+bikeMin+' мин');
-  if(walkMin) parts.push('прогулки '+walkMin+' мин');
+  if(bikeSec) parts.push('велик '+recTime(bikeSec,'min'));
+  if(walkSec) parts.push('прогулки '+recTime(walkSec,'min'));
   if(pause) parts.push('пауз '+pause);
   return h + '<div class="stat">'+parts.join(' · ')+'</div><div class="stat">✓ тренировка · 🚴 велик · 🚶 прогулка · 🤒 пауза · ↪ перенесена. Бирюзовая рамка - день тренировки по плану.</div>';
 }
 
-/* что сделала: повторы, резинка, вес, минуты */
-const REC_IDS = ['30','4','6','8','10','12','14','21','23','24','25'], BAND = ['6','10','23'];
+/* Единица результата по ID карточки. */
+const REC_UNITS = {
+  30:'min', 4:'reps', 6:'reps', 8:'reps', 10:'reps', 12:'sec', 14:'reps', 21:'reps',
+  23:'reps', 24:'reps', 25:'reps', 16:'sec', 17:'sec', 18:'sec', 19:'sec', 20:'min'
+};
+const BAND = ['6','10','23'];
 const BANDS = ['самая лёгкая','лёгкая','средняя','тугая','самая тугая','отрезанная'];
-function usesReps(id){ return id!=='30' && id!=='12'; }
+function recTime(seconds, unit){
+  if(unit==='sec') return seconds+' сек';
+  const minutes = Math.floor(seconds/60), rest = seconds%60;
+  return minutes ? minutes+' мин'+(rest ? ' '+rest+' сек' : '') : rest ? rest+' сек' : '0 мин';
+}
+function recAmount(value, unit){
+  if(unit!=='min') return value;
+  const min = Math.floor(value/60), sec = value%60;
+  return sec ? min+':'+String(sec).padStart(2,'0') : min;
+}
 function recValue(id, entry){
-  const result = usesReps(id) && WorkoutReps.read(entry.n);
+  const unit = REC_UNITS[id], result = WorkoutReps.read(entry.n,unit);
   if(!result) return recNum(entry.n);
-  return WorkoutReps.total(result.sets) || null;
+  const total = WorkoutReps.total(result.sets);
+  return total ? total/WorkoutReps.factor(unit) : recNum(entry.legacyN);
+}
+function recHasResult(id, entry){
+  const result = WorkoutReps.read(entry.n,REC_UNITS[id]);
+  return result ? WorkoutReps.total(result.sets)>0 || !!entry.legacyN : !!entry.n;
 }
 function recTxt(id, r){
-  const result = usesReps(id) && WorkoutReps.read(r.n);
-  const label = !result ? r.n : !WorkoutReps.uniform(result.sets) ? result.sets.join(' / ') : r.n;
+  const unit = REC_UNITS[id], result = WorkoutReps.read(r.n,unit);
+  let label = r.n;
+  if(result && !WorkoutReps.uniform(result.sets)){
+    label = result.sets.map(value => unit==='reps' ? value : recTime(value,unit)).join(' / ');
+  }
+  if(r.legacyN) label = result && WorkoutReps.total(result.sets)>0 ? label+' (исходная запись: '+r.legacyN+')' : r.legacyN;
   return [label, r.kg ? r.kg+' кг' : '', r.b, r.k==='walk' ? 'прогулка' : ''].filter(Boolean).join(', ');
 }
 function spark(vals){
@@ -1091,8 +1127,7 @@ function recHistory(id, rec, today){
   return Object.keys(rec).filter(day => {
     const entry = rec[day][id];
     if(day >= today || !entry) return false;
-    const result = usesReps(id) && WorkoutReps.read(entry.n);
-    return result ? WorkoutReps.total(result.sets)>0 : !!(entry.n || entry.kg);
+    return recHasResult(id,entry) || (!entry.n && !!entry.kg);
   }).sort();
 }
 function recPaintHistory(box, id, rec, today, prev){
@@ -1108,61 +1143,71 @@ function recPaintHistory(box, id, rec, today, prev){
   history.innerHTML = spark(vals)+(hist ? '<div class="rec-list">Раньше: '+hist+'</div>' : '');
   history.hidden = !history.innerHTML;
 }
-function recStepper(action, label, value, max, index){
+function recStepper(action, label, value, max, index, amount = value){
   const attrs = ' data-rec-action="'+action+'"'+(index==null ? '' : ' data-set="'+index+'"');
   return '<div class="rec-stepper" role="group" aria-label="'+label+'">'+
     '<button type="button"'+attrs+' data-delta="-1" aria-label="Уменьшить: '+label+'" aria-disabled="'+(value===0)+'">−</button>'+
-    '<span class="rec-number">'+value+'</span>'+
+    '<span class="rec-number'+(typeof amount==='string' ? ' rec-number-clock' : '')+'">'+amount+'</span>'+
     '<button type="button"'+attrs+' data-delta="1" aria-label="Увеличить: '+label+'" aria-disabled="'+(value===max)+'">+</button></div>';
 }
-function recPaintReps(box, entry){
+function recPaintCounters(box, entry, unit){
   const focus = document.activeElement, details = box.querySelector('.rec-details');
-  const result = WorkoutReps.read(entry.n);
+  const counters = box.querySelector('.rec-counters'), replace = box.querySelector('[data-rec-action="replace"]');
+  const timed = unit!=='reps', result = WorkoutReps.read(entry.n,unit);
+  const unsupported = timed && !!entry.n && !result;
+  counters.hidden = details.hidden = unsupported;
+  if(replace) replace.hidden = !unsupported;
   const {sets, reps} = result || {sets:[], reps:0};
   const mixed = !WorkoutReps.uniform(sets), n = sets.length, total = WorkoutReps.total(sets);
-  box.querySelector('.rec-counters').innerHTML =
+  const max = WorkoutReps.maximum(unit), label = timed ? unit==='sec' ? 'Секунд' : 'Минут' : 'Повторений';
+  const amount = recAmount(reps,unit);
+  counters.innerHTML =
     '<div><span class="rec-l rec-counter-label">Подходов</span>'+recStepper('count','Подходы',n,WorkoutReps.maxSets)+'</div>'+
-    '<div><span class="rec-l rec-counter-label">Повторений</span>'+(mixed ? '<span class="rec-mixed">Разные</span>' :
-      recStepper('reps','Повторения в каждом подходе',reps,WorkoutReps.maxReps))+'</div>';
+    '<div><span class="rec-l rec-counter-label">'+(typeof amount==='string' && !mixed ? 'Мин:сек' : label)+'</span>'+
+      (mixed ? '<span class="rec-mixed">Разные</span>' :
+      recStepper('reps',timed ? label+' в каждом подходе' : 'Повторения в каждом подходе',reps,max,null,amount))+'</div>';
   const setLabel = n+' '+plural(n,'подход','подхода','подходов');
-  const repLabel = total+' '+plural(total,'повторение','повторения','повторений');
+  const totalLabel = timed ? recTime(total,unit) : total+' '+plural(total,'повторение','повторения','повторений');
   let summary = 'Результат ещё не внесён';
-  if(mixed) summary = setLabel+' · '+sets.join(' / ')+'<br>'+setLabel+' · '+repLabel;
-  else if(total) summary = n+' × '+reps+' = '+repLabel;
+  if(mixed) summary = setLabel+' · '+sets.map(value => timed ? recTime(value,unit) : value).join(' / ')+'<br>'+setLabel+' · '+totalLabel;
+  else if(total) summary = n+' × '+(timed ? recTime(reps,unit) : reps)+' = '+totalLabel;
   else if(!result && entry.n) summary = 'Сегодня: '+escH(entry.n);
+  if(entry.legacyN) summary += '<br>Исходная запись: '+escH(entry.legacyN);
   box.querySelector('.rec-total').innerHTML = summary;
   details.querySelector('.rec-sets').innerHTML = sets.map((value, i) => {
     const label = 'Подход '+(i+1);
-    return '<div class="rec-set"><span>'+label+'</span>'+recStepper('set',label,value,WorkoutReps.maxReps,i)+'</div>';
-  }).join('')+(mixed ? '<button type="button" class="rec-equal" data-rec-action="equal">Сделать одинаковыми (по '+sets[0]+')</button>' : '');
-  if(focus?.dataset.recAction && !focus.isConnected){
+    const amount = recAmount(value,unit);
+    const suffix = unit==='sec' ? 'сек' : typeof amount==='string' ? 'м:с' : 'мин';
+    return '<div class="rec-set'+(timed ? ' rec-set-timed' : '')+'"><span>'+label+'</span>'+
+      recStepper('set',timed ? label+', '+suffix : label,value,max,i,amount)+(timed ? '<span class="rec-u" aria-hidden="true">'+suffix+'</span>' : '')+'</div>';
+  }).join('')+(mixed ? '<button type="button" class="rec-equal" data-rec-action="equal">Сделать одинаковыми (по '+(timed ? recTime(sets[0],unit) : sets[0])+')</button>' : '');
+  if(focus && focus===replace && replace.hidden) counters.querySelector('[data-delta="1"]').focus({preventScroll:true});
+  else if(focus?.dataset.recAction && !focus.isConnected){
     const next = [...box.querySelectorAll('[data-rec-action]')].find(button =>
       button.dataset.recAction===focus.dataset.recAction && button.dataset.set===focus.dataset.set && button.dataset.delta===focus.dataset.delta);
     (next || details.querySelector('summary')).focus({preventScroll:true});
   }
 }
 function recPaint(card){
-  const id = card.dataset.id, today = ymd(new Date()), rec = lget(RECKEY,{}), cur = rec[today]?.[id] || {};
+  const id = card.dataset.id, unit = REC_UNITS[id], today = ymd(new Date()), rec = lget(RECKEY,{}), cur = rec[today]?.[id] || {};
   const prev = recHistory(id, rec, today), last = rec[prev[prev.length-1]]?.[id];
   let box = card.querySelector('.rec');
   if(!box){ box = document.createElement('div'); box.className = 'rec'; card.querySelector('.card-body').appendChild(box); }
-  let h = '';
-  if(usesReps(id)){
-    h = '<div><div class="rec-counters"></div><div class="rec-total" role="status"></div></div>'+
-      '<details class="rec-details"><summary>Повторения по подходам</summary><div class="rec-sets"></div></details>';
-  }
+  let h = '<div><div class="rec-counters"></div><div class="rec-total" role="status"></div></div>'+
+    '<details class="rec-details"><summary>'+(unit==='reps' ? 'Повторения' : 'Время')+' по подходам</summary><div class="rec-sets"></div></details>';
+  if(unit!=='reps') h += '<button type="button" class="rec-equal" data-rec-action="replace" hidden>Ввести длительность</button>';
   const lastB = cur.b ?? last?.b ?? '';
-  if(!usesReps(id) || id==='25' || BAND.includes(id)) h += '<div class="rec-row">';
-  if(!usesReps(id)) h += '<label class="rec-l">Сегодня сделала <input class="rec-n" data-f="n" value="'+escH(cur.n)+'" placeholder="'+escH(last?.n || (id==='30' ? 'минут' : '2×20 сек'))+'"></label>';
-  if(id==='30') h += '<select data-f="k"><option value="bike"'+(cur.k!=='walk'?' selected':'')+'>велик</option><option value="walk"'+(cur.k==='walk'?' selected':'')+'>прогулка</option></select>';
+  const extras = id==='30' || id==='25' || BAND.includes(id);
+  if(extras) h += '<div class="rec-row">';
+  if(id==='30') h += '<select data-f="k" aria-label="Вид кардио"><option value="bike"'+(cur.k!=='walk'?' selected':'')+'>велик</option><option value="walk"'+(cur.k==='walk'?' selected':'')+'>прогулка</option></select>';
   if(id==='25') h += '<label class="rec-u">Вес <input class="rec-kg" aria-label="Вес гантели в килограммах" data-f="kg" inputmode="decimal" value="'+escH(cur.kg)+'" placeholder="'+escH(last?.kg || '0')+'"> кг</label>';
   if(BAND.includes(id)) h += '<select data-f="b" aria-label="Резинка"><option value="">резинка</option>'+BANDS.map(b => '<option'+(b===lastB?' selected':'')+'>'+b+'</option>').join('')+'</select>';
-  if(!usesReps(id) || id==='25' || BAND.includes(id)) h += '</div>';
-  box.innerHTML = h+(usesReps(id) ? '<div class="rec-error" role="alert"></div>' : '')+'<div class="rec-h" hidden></div>';
-  if(usesReps(id)) recPaintReps(box, cur);
+  if(extras) h += '</div>';
+  box.innerHTML = h+'<div class="rec-error" role="alert"></div><div class="rec-h" hidden></div>';
+  recPaintCounters(box, cur, unit);
   recPaintHistory(box, id, rec, today, prev);
 }
-function updateRepRecord(card, edit){
+function updateRecord(card, edit){
   const id = card.dataset.id, today = ymd(new Date()), rec = lget(RECKEY,{});
   const entry = rec[today]?.[id] || {}, box = card.querySelector('.rec');
   if(!edit(entry, box)) return false;
@@ -1177,52 +1222,60 @@ document.addEventListener('click', e => {
   const button = e.target.closest('[data-rec-action]');
   if(!button || button.getAttribute('aria-disabled')==='true') return;
   const box = button.closest('.rec'), card = box.closest('.card');
+  const id = card.dataset.id, unit = REC_UNITS[id], max = WorkoutReps.maximum(unit);
   const {recAction, delta, set} = button.dataset;
+  const change = Number(delta)*WorkoutReps.factor(unit);
   let doneChange;
-  const updated = updateRepRecord(card, entry => {
-    const {sets, reps} = WorkoutReps.read(entry.n) || {sets:[], reps:0};
-    let nextReps = reps;
-    if(recAction==='count'){
+  const updated = updateRecord(card, entry => {
+    const result = WorkoutReps.read(entry.n,unit);
+    const {sets, reps} = result || {sets:[], reps:0};
+    let next = reps;
+    if(recAction==='replace'){
+      if(unit==='reps' || !entry.n || result) return false;
+      entry.legacyN = entry.n;
+    } else if(recAction==='count'){
       if(Number(delta)>0 && sets.length<WorkoutReps.maxSets) sets.push(sets.at(-1) ?? reps);
       else if(Number(delta)<0 && sets.length) sets.pop();
       else return false;
     } else if(recAction==='set'){
       if(sets[set]==null) return false;
-      sets[set] = Math.max(0, Math.min(WorkoutReps.maxReps, sets[set]+Number(delta)));
+      sets[set] = Math.max(0, Math.min(max, sets[set]+change));
     } else if(recAction==='equal'){
       sets.fill(sets[0]);
     } else {
       if(!WorkoutReps.uniform(sets)) return false;
-      nextReps = Math.max(0, Math.min(WorkoutReps.maxReps, reps+Number(delta)));
-      sets.fill(nextReps);
+      next = Math.max(0, Math.min(max, reps+change));
+      sets.fill(next);
     }
-    entry.n = WorkoutReps.write({sets, reps:nextReps});
-    const hasReps = WorkoutReps.total(sets)>0;
-    if(hasReps && entry.b==null){
+    if(id==='30' && !entry.n && card.classList.contains('done')) entry.marked = true;
+    entry.n = WorkoutReps.write({sets, reps:next},unit);
+    const hasResult = WorkoutReps.total(sets)>0;
+    if(hasResult && entry.b==null){
       const band = box.querySelector('[data-f="b"]')?.value;
       if(band) entry.b = band;
     }
-    if(hasReps && !card.classList.contains('done')){
+    if(hasResult && !card.classList.contains('done')){
       entry.autoDone = true;
       doneChange = true;
-    } else if(!hasReps && entry.autoDone){
+    } else if(!hasResult && entry.autoDone){
       delete entry.autoDone;
       doneChange = false;
     }
     return true;
   });
   if(!updated) return;
-  recPaintReps(box, updated);
+  recPaintCounters(box, updated, unit);
   if(doneChange!=null){
     setCardDone(card, doneChange);
-    updateProgress(); save(); renderToday();
+    updateProgress(); save();
   }
+  if(doneChange!=null || id==='30') renderToday();
 });
 document.addEventListener('input', e => {
   if(!e.target.matches('.rec-kg')) return;
   const value = e.target.value.trim();
   if(value && !/^(?:\d+(?:[,.]\d*)?|[,.]\d+)$/.test(value)) return;
-  updateRepRecord(e.target.closest('.card'), entry => {
+  updateRecord(e.target.closest('.card'), entry => {
     if(value) entry.kg = value;
     else delete entry.kg;
     return true;
@@ -1231,26 +1284,23 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const box = e.target.closest && e.target.closest('.rec'); if(!box) return;
   const card = box.closest('.card'), id = card.dataset.id, tk = ymd(new Date()), rec = lget(RECKEY,{});
-  if(usesReps(id)){
-    if(e.target.dataset.f==='b'){
-      const saved = updateRepRecord(card, entry => { entry.b = e.target.value; return true; });
-      if(!saved){
-        const prev = recHistory(id, rec, tk);
-        e.target.value = rec[tk]?.[id]?.b ?? rec[prev.at(-1)]?.[id]?.b ?? '';
-      }
+  if(e.target.dataset.f==='b'){
+    const saved = updateRecord(card, entry => { entry.b = e.target.value; return true; });
+    if(!saved){
+      const prev = recHistory(id, rec, tk);
+      e.target.value = rec[tk]?.[id]?.b ?? rec[prev.at(-1)]?.[id]?.b ?? '';
     }
-    if(e.target.dataset.f==='kg') e.target.value = rec[tk]?.[id]?.kg || '';
-    return;
   }
-  const o = {}; box.querySelectorAll('[data-f]').forEach(x => { const v = x.value.trim(); if(v) o[x.dataset.f] = v; });
-  const has = !!(o.n || o.kg || (id==='30' && e.target.dataset.f==='k'));
-  rec[tk] = rec[tk] || {};
-  if(has || (id==='30' && card.classList.contains('done'))) rec[tk][id] = o; else delete rec[tk][id];
-  if(!Object.keys(rec[tk]).length) delete rec[tk];
-  lset(RECKEY, rec);
-  if(has && !card.classList.contains('done')) toggleCard(card.querySelector('.card-head'));
-  else renderToday();
-  recPaint(card);
+  if(e.target.dataset.f==='k'){
+    const saved = updateRecord(card, entry => {
+      entry.k = e.target.value;
+      if(!entry.n && !card.classList.contains('done')) entry.n = WorkoutReps.write({sets:[], reps:0},'min');
+      return true;
+    });
+    if(saved) renderToday();
+    else e.target.value = rec[tk]?.[id]?.k || 'bike';
+  }
+  if(e.target.dataset.f==='kg') e.target.value = rec[tk]?.[id]?.kg || '';
 });
 document.addEventListener('keydown', e => { if(e.key==='Enter' && e.target.closest && e.target.closest('.rec') && e.target.tagName==='INPUT') e.target.blur(); });
 
@@ -1422,7 +1472,7 @@ load().forEach(id => {
   if(card){ card.classList.add('done'); card.querySelector('.checkbox').classList.add('checked'); }
 });
 try{ const db = document.getElementById('dumb-on'); db.checked = dumbOn(); db.addEventListener('change', () => { lset(DUMBKEY, db.checked); refreshAll(); }); }catch(e){}
-REC_IDS.forEach(id => { const c = document.querySelector('.card[data-id="'+id+'"]'); if(c) recPaint(c); });
+Object.keys(REC_UNITS).forEach(id => { const c = document.querySelector('.card[data-id="'+id+'"]'); if(c) recPaint(c); });
 applyDay();
 updateProgress();
 renderToday();
